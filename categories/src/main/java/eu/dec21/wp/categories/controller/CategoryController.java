@@ -57,6 +57,7 @@ public class CategoryController {
     @GetMapping("/find")
     @Operation(summary = "Get Category by name")
     public ResponseEntity<CategoryDto> getCategoryByName(@Parameter(name="name", description = "Category or Project name", example = "My Project") @RequestParam String name) {
-        return null;
+        CategoryDto categoryDto = categoryService.findCategoryByName(name, 1L);
+        return ResponseEntity.ok(categoryDto);
     }
 }

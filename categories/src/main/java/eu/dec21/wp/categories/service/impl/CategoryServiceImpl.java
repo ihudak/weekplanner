@@ -56,4 +56,12 @@ public class CategoryServiceImpl implements CategoryService {
 
         categoryRepository.deleteById(categoryId);
     }
+
+    @Override
+    public CategoryDto findCategoryByName(String name, Long userId) {
+        Category category = categoryRepository.findByNameAndUserId(name, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category does not exist with the given name: " + name));
+
+        return CategoryMapper.mapToCategoryDto(category);
+    }
 }
