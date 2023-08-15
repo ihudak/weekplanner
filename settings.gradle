@@ -1,0 +1,6 @@
+rootProject.name = 'wp'
+
+include 'exceptions'
+include 'common'
+include 'categories'
+include 'users'

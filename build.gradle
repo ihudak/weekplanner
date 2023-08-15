@@ -1,0 +1,70 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.1.2'
+    id 'io.spring.dependency-management' version '1.1.2'
+}
+
+
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'org.springframework.boot'
+    apply plugin: 'io.spring.dependency-management'
+    configurations {
+
+    }
+
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-web'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+        implementation 'org.projectlombok:lombok:1.18.28'
+        developmentOnly 'org.springframework.boot:spring-boot-devtools'
+        runtimeOnly 'io.micrometer:micrometer-registry-dynatrace'
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    }
+}
+
+project("exceptions") {
+
+}
+
+project("common") {
+    dependencies {
+        implementation project(":exceptions")
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    }
+}
+
+project("categories") {
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        runtimeOnly 'org.postgresql:postgresql'
+        implementation project(':common')
+        implementation project(':exceptions')
+    }
+}
+
+project("users") {
+    dependencies {
+        implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        runtimeOnly 'org.postgresql:postgresql'
+        implementation project(':common')
+        implementation project(':exceptions')
+    }
+}
+
+allprojects {
+    group = 'eu.dec21'
+    version = '0.0.1-SNAPSHOT'
+    java {
+        sourceCompatibility = '17'
+    }
+    repositories {
+        mavenCentral()
+    }
+
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
+}
