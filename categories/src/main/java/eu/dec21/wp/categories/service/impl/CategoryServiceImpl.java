@@ -64,4 +64,9 @@ public class CategoryServiceImpl implements CategoryService {
 
         return CategoryMapper.mapToCategoryDto(category);
     }
+
+    @Override
+    public long count() {
+        return categoryRepository.count();
+    }
 }

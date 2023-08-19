@@ -1,6 +1,5 @@
 package eu.dec21.wp.users.entity;
 
-import eu.dec21.wp.helper.Constraints;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -9,7 +8,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email"), @UniqueConstraint(columnNames = { "auth_system, auth_id" } ) } )
+@Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email"), @UniqueConstraint(columnNames = { "auth_system", "auth_id" } ) } )
 public class User {
 
     @Id
@@ -31,11 +30,4 @@ public class User {
 
     @Column(name = "auth_id", length = 255)
     private String authID;
-
-    public void setEmail(String email) {
-        if (!email.matches(Constraints.emailRegExp)) {
-            throw new eu.dec21.wp.exceptions.BadRequestException("Invalid email address");
-        }
-        this.email = email;
-    }
 }

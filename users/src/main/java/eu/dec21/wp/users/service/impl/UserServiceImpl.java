@@ -70,4 +70,9 @@ public class UserServiceImpl implements UserService {
 
         return UserMapper.mapToUserDto(user);
     }
+
+    @Override
+    public long count() {
+        return userRepository.count();
+    }
 }

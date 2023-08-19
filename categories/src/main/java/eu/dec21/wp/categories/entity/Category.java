@@ -11,7 +11,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "categories", uniqueConstraints = { @UniqueConstraint(columnNames = { "userId, name" } ) } )
+@Table(name = "categories", uniqueConstraints = { @UniqueConstraint(columnNames = { "user_id", "name" } ) } )
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,10 +27,19 @@ public class Category {
     @Max(Constraints.maxPrio)
     private Integer priority;
 
-    @Column(name = "color", nullable = true, length = 25)
+    @Column(name = "color", nullable = true, length = 255)
     private String color;
 
     @Column(name = "user_id", nullable = false)
     @NonNull
     private Long userId;
+
+    public void setPriority(int priority) {
+        if (priority > Constraints.maxPrio) {
+            priority = Constraints.maxPrio;
+        } else if (priority < Constraints.minPrio) {
+            priority = Constraints.minPrio;
+        }
+        this.priority = priority;
+    }
 }

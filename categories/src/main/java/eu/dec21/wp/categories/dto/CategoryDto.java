@@ -4,6 +4,7 @@ import eu.dec21.wp.helper.Constraints;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Getter
@@ -15,6 +16,7 @@ public class CategoryDto {
 
     @NonNull
     @Schema(name="name", example = "My Project", requiredMode = Schema.RequiredMode.REQUIRED, description = "Category or Project to group ToDo items")
+    @Size(min = 2, max = 25)
     private String name;
 
     @NonNull
@@ -28,5 +30,6 @@ public class CategoryDto {
 
     @NonNull
     @Schema(name="userId", example = "45", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the owner of the Category")
+    @Min(1)
     private Long userId;
 }

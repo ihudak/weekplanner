@@ -11,4 +11,6 @@ public interface CategoryService {
     CategoryDto updateCategory(Long categoryId, CategoryDto updatedCategory);
     void deleteCategory(Long categoryId);
     CategoryDto findCategoryByName(String name, Long userId);
+
+    long count();
 }
