@@ -66,6 +66,27 @@ class CategoryRepositoryTest {
     }
 
     @Test
+    void findAllByUserId() {
+        long user1 = 1, user2 = 2, user3 = 3;
+        int numCatUser1 = 5, numCatUser2 = 7, numCatUser3 = 3;
+        List<Category> categoriesUser1 = categoryDirector.constructRandomCategoriesForUser(user1, numCatUser1);
+        List<Category> categoriesUser2 = categoryDirector.constructRandomCategoriesForUser(user2, numCatUser2);
+        List<Category> categoriesUser3 = categoryDirector.constructRandomCategoriesForUser(user3, numCatUser3);
+        categoryRepository.saveAll(categoriesUser1);
+        categoryRepository.saveAll(categoriesUser2);
+        categoryRepository.saveAll(categoriesUser3);
+
+        assertEquals(numCatUser1 + numCatUser2 + numCatUser3, categoryRepository.count());
+
+        List<Category> foundCategoriesUser1 = categoryRepository.findAllByUserId(user1);
+        assertEquals(numCatUser1, foundCategoriesUser1.size());
+
+        for (Category category: foundCategoriesUser1) {
+            assertEquals(user1, category.getUserId());
+        }
+    }
+
+    @Test
     void nameAndUserIdConstraintShouldViolate() {
         String catName = getRandStr(20);
         long userId = faker.random().nextLong();
