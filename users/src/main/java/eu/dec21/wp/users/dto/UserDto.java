@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserDto {
 
     @Min(0)
@@ -43,5 +44,39 @@ public class UserDto {
             throw new eu.dec21.wp.exceptions.BadRequestException("Invalid email address: " + email);
         }
         this.email = email;
+    }
+
+    public boolean equals(UserDto o) {
+        // different emails
+        if (!this.email.equals(o.email)) {
+            return false;
+        }
+        // different auth systems
+        if (this.authID != null && o.authID == null || this.authID == null && o.authID != null) {
+            return false;
+        }
+        if (this.authID != null && !this.authID.equals(o.authID)) {
+            return false;
+        }
+        if (this.authSystem != null && o.authSystem == null || this.authSystem == null && o.authSystem != null) {
+            return false;
+        }
+        if (this.authSystem != null && !this.authSystem.equals(o.authSystem)) {
+            return false;
+        }
+        // different name
+        if (this.firstName != null && o.firstName == null || this.firstName == null && o.firstName != null) {
+            return false;
+        }
+        if (this.firstName != null && !this.firstName.equals(o.firstName)) {
+            return false;
+        }
+        if (this.lastName != null && o.lastName == null || this.lastName == null && o.lastName != null) {
+            return false;
+        }
+        if (this.lastName != null && !this.lastName.equals(o.lastName)) {
+            return false;
+        }
+        return true;
     }
 }

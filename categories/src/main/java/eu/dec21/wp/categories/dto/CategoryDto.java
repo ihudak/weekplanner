@@ -11,6 +11,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class CategoryDto {
     private Long id;
 
@@ -32,4 +33,28 @@ public class CategoryDto {
     @Schema(name="userId", example = "45", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the owner of the Category")
     @Min(1)
     private Long userId;
+
+    public boolean equals(CategoryDto c) {
+        // different names
+        if (!this.name.equals(c.name)) {
+            return false;
+        }
+        // different priorities
+        if (!this.priority.equals(c.priority)) {
+            return false;
+        }
+        // different users
+        if (!this.userId.equals(c.userId)) {
+            return false;
+        }
+        // different colors
+        if (this.color == null && c.color != null || this.color != null && c.color == null) {
+            return false;
+        }
+        if (this.color != null && !this.color.equals(c.color)) {
+            return false;
+        }
+
+        return true;
+    }
 }

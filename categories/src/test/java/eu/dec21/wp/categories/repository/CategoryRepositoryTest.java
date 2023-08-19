@@ -49,27 +49,27 @@ class CategoryRepositoryTest {
     @Test
     void findByNameAndUserId() {
         String catName = getRandStr(20);
-        long userID = faker.random().nextLong();
-        List<Category> categories = categoryDirector.constructRandomCategoriesForUser(userID, 2);
+        long userId = faker.random().nextLong();
+        List<Category> categories = categoryDirector.constructRandomCategoriesForUser(userId, 2);
         categories.get(0).setName(catName);
 
         Category category1 = categoryRepository.save(categories.get(0));
         assertNotNull(category1);
         categoryRepository.save(categories.get(1));
-        Optional<Category> category = categoryRepository.findByNameAndUserId(catName, userID);
+        Optional<Category> category = categoryRepository.findByNameAndUserId(catName, userId);
         assertTrue(category.isPresent());
         assertEquals(catName, category.get().getName());
         assertEquals(category1.getId(), category.get().getId());
 
-        category = categoryRepository.findByNameAndUserId(faker.beer().name(), userID);
+        category = categoryRepository.findByNameAndUserId(faker.beer().name(), userId);
         assertFalse(category.isPresent());
     }
 
     @Test
     void nameAndUserIdConstraintShouldViolate() {
         String catName = getRandStr(20);
-        long userID = faker.random().nextLong();
-        List<Category> categories = categoryDirector.constructRandomCategoriesForUser(userID, 3);
+        long userId = faker.random().nextLong();
+        List<Category> categories = categoryDirector.constructRandomCategoriesForUser(userId, 3);
         categories.get(0).setName(catName);
         categories.get(2).setName(catName);
 

@@ -21,7 +21,7 @@ public class CategoryDirector {
 
     private CategoryBuilder prepareCategory() {
         return categoryBuilder.reset()
-                .setId(faker.random().nextLong())
+                .setId(0)
                 .setName(getRandStr(getRantNameLength()))
                 .setPriority(faker.number().numberBetween(Constraints.minPrio, Constraints.maxPrio))
                 .setColor(faker.color().hex())
@@ -33,9 +33,9 @@ public class CategoryDirector {
                 .build();
     }
 
-    public Category constructRandomCategoryForUser(long userID) {
+    public Category constructRandomCategoryForUser(long userId) {
         return prepareCategory()
-                .setUserId(userID)
+                .setUserId(userId)
                 .build();
     }
 
@@ -49,7 +49,7 @@ public class CategoryDirector {
         return categories;
     }
 
-    public List<Category> constructRandomCategoriesForUser(long userID, int numCategories) {
-        return this.constructRandomCategories(numCategories).stream().peek(category -> category.setUserId(userID)).collect(Collectors.toList());
+    public List<Category> constructRandomCategoriesForUser(long userId, int numCategories) {
+        return this.constructRandomCategories(numCategories).stream().peek(category -> category.setUserId(userId)).collect(Collectors.toList());
     }
 }

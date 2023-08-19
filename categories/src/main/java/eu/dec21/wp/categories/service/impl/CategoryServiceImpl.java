@@ -66,6 +66,33 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public List<CategoryDto> getAllCategoriesForUser(Long userId) {
+        List<Category> categories = categoryRepository.findAllByUserId(userId);
+        return categories.stream().map(CategoryMapper::mapToCategoryDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public CategoryDto updateCategory(String name, Long userId, CategoryDto updatedCategoryDto) {
+        Category category = categoryRepository.findByNameAndUserId(name, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category does not exist with the given name: " + name));
+
+        category.setName(updatedCategoryDto.getName());
+        category.setPriority(updatedCategoryDto.getPriority());
+        category.setColor(updatedCategoryDto.getColor());
+
+        Category updatedCategory = categoryRepository.save(category);
+
+        return CategoryMapper.mapToCategoryDto(updatedCategory);
+    }
+
+    @Override
+    public void deleteCategory(String name, Long userId) {
+        Category category = categoryRepository.findByNameAndUserId(name, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category does not exist with the given name: " + name));
+        categoryRepository.delete(category);
+    }
+
+    @Override
     public long count() {
         return categoryRepository.count();
     }

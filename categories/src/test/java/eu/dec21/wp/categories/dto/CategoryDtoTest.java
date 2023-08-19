@@ -1,8 +1,11 @@
 package eu.dec21.wp.categories.dto;
 
+import eu.dec21.wp.categories.entity.Category;
+import eu.dec21.wp.categories.entity.CategoryDirector;
+import eu.dec21.wp.categories.mapper.CategoryMapper;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 class CategoryDtoTest {
 
@@ -52,5 +55,63 @@ class CategoryDtoTest {
 
         category.setUserId(-1L);
         assertEquals(-1L, category.getUserId());
+    }
+
+    @Test
+    void equalsComparesCategories() {
+        CategoryDirector categoryDirector = new CategoryDirector();
+        Category category = categoryDirector.constructRandomCategory();
+
+        CategoryDto category1, category2;
+        category1 = CategoryMapper.mapToCategoryDto(category);
+        category2 = CategoryMapper.mapToCategoryDto(category);
+        category1.setId(10L);
+        category2.setId(20L);
+
+        // different IDs
+        assertTrue(category1.equals(category2));
+        assertTrue(category2.equals(category1));
+
+        // different names
+        category2.setName("New Name");
+        assertFalse(category1.equals(category2));
+        assertFalse(category2.equals(category1));
+
+        // different users
+        category1 = CategoryMapper.mapToCategoryDto(category);
+        category2 = CategoryMapper.mapToCategoryDto(category);
+        assertTrue(category1.equals(category2));
+        assertTrue(category2.equals(category1));
+        category1.setUserId(10L);
+        category2.setUserId(20L);
+        assertFalse(category1.equals(category2));
+        assertFalse(category2.equals(category1));
+
+        // different priorities
+        category1 = CategoryMapper.mapToCategoryDto(category);
+        category2 = CategoryMapper.mapToCategoryDto(category);
+        assertTrue(category1.equals(category2));
+        assertTrue(category2.equals(category1));
+        category1.setPriority(2);
+        category2.setPriority(5);
+        assertFalse(category1.equals(category2));
+        assertFalse(category2.equals(category1));
+
+        // different colors
+        category1 = CategoryMapper.mapToCategoryDto(category);
+        category2 = CategoryMapper.mapToCategoryDto(category);
+        assertTrue(category1.equals(category2));
+        assertTrue(category2.equals(category1));
+        category1.setColor("red");
+        category2.setColor("blue");
+        assertFalse(category1.equals(category2));
+        assertFalse(category2.equals(category1));
+
+        category2.setColor("red");
+        assertTrue(category1.equals(category2));
+        assertTrue(category2.equals(category1));
+        category2.setColor(null);
+        assertFalse(category1.equals(category2));
+        assertFalse(category2.equals(category1));
     }
 }

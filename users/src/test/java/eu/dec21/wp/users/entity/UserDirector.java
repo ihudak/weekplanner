@@ -11,7 +11,7 @@ public class UserDirector {
 
     public User constructRandomUser() {
         return userBuilder.reset()
-                .setId(faker.random().nextLong())
+                .setId(0)
                 .setFirstName(faker.name().firstName())
                 .setLastName(faker.name().lastName())
                 .setEmail(faker.internet().emailAddress())
