@@ -39,6 +39,10 @@ public class UserDto {
     @Size(max = 255)
     private String authID;
 
+    @Builder.Default
+    @Schema(name = "suspended", example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether user account is suspended")
+    private boolean suspended = false;
+
     public void setEmail(String email) {
         if (!email.matches(Constraints.emailRegExp)) {
             throw new eu.dec21.wp.exceptions.BadRequestException("Invalid email address: " + email);

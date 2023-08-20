@@ -52,6 +52,14 @@ public class CategoryBuilder {
         return this;
     }
 
+    public CategoryBuilder setDeleted(boolean deleted) {
+        if (this.category == null) {
+            this.reset();
+        }
+        this.category.setDeleted(deleted);
+        return this;
+    }
+
     public Category build() {
         if (this.category == null) {
             this.reset();

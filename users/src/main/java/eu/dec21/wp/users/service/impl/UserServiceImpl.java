@@ -2,10 +2,14 @@ package eu.dec21.wp.users.service.impl;
 
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.users.dto.UserDto;
+import eu.dec21.wp.users.dto.UserResponse;
 import eu.dec21.wp.users.entity.User;
 import eu.dec21.wp.users.mapper.UserMapper;
 import eu.dec21.wp.users.repository.UserRepository;
 import eu.dec21.wp.users.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,6 +39,24 @@ public class UserServiceImpl implements UserService {
     public List<UserDto> getAllUsers() {
         List<User> users = userRepository.findAll();
         return users.stream().map(UserMapper::mapToUserDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResponse getAllUser(int pageNo, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        Page<User> users = userRepository.findAll(pageable);
+        List<User> userList = users.getContent();
+        List<UserDto> userDtoList = userList.stream().map(UserMapper::mapToUserDto).toList();
+
+        UserResponse userResponse = new UserResponse();
+        userResponse.setContent(userDtoList);
+        userResponse.setPageNo(users.getNumber());
+        userResponse.setPageSize(users.getSize());
+        userResponse.setTotalElements(users.getTotalElements());
+        userResponse.setTotalPages(users.getTotalPages());
+        userResponse.setLast(users.isLast());
+
+        return userResponse;
     }
 
     @Override

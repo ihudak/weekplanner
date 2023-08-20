@@ -11,7 +11,8 @@ public class UserMapper {
                 user.getLastName(),
                 user.getEmail(),
                 user.getAuthSystem(),
-                user.getAuthID()
+                user.getAuthID(),
+                user.isSuspended()
         );
     }
 
@@ -22,7 +23,8 @@ public class UserMapper {
                 userDto.getLastName(),
                 userDto.getEmail(),
                 userDto.getAuthSystem(),
-                userDto.getAuthID()
+                userDto.getAuthID(),
+                userDto.isSuspended()
         );
     }
 }

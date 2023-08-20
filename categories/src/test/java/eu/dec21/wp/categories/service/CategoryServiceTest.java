@@ -1,6 +1,7 @@
 package eu.dec21.wp.categories.service;
 
 import eu.dec21.wp.categories.dto.CategoryDto;
+import eu.dec21.wp.categories.dto.CategoryResponse;
 import eu.dec21.wp.categories.entity.Category;
 import eu.dec21.wp.categories.entity.CategoryBuilder;
 import eu.dec21.wp.categories.entity.CategoryDirector;
@@ -19,7 +20,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,8 +56,10 @@ class CategoryServiceTest {
         categories = new ArrayList<>();
         //lenient().when(categoryRepository.save(Mockito.any(Category.class))).thenReturn(categoriesUser1.get(0));
 
+        // count
         lenient().when(categoryRepository.count()).then((Answer) invocation -> (long)categories.size());
 
+        // find by id
         lenient().when(categoryRepository.findById(Mockito.any(Long.class))).then((Answer<Optional<Category>>) invocation -> {
            int categoryId = invocation.getArgument(0, Long.class).intValue();
            if (!categories.isEmpty()) {
@@ -68,6 +72,7 @@ class CategoryServiceTest {
            return Optional.empty();
         });
 
+        // find by name and user
         lenient().when(categoryRepository.findByNameAndUserId(Mockito.anyString(), Mockito.anyLong())).then((Answer<Optional<Category>>) invocation -> {
             String name = invocation.getArgument(0, String.class);
             long userId = invocation.getArgument(1, Long.class);
@@ -81,6 +86,7 @@ class CategoryServiceTest {
             return Optional.empty();
         });
 
+        // saveAll
         lenient().when(categoryRepository.saveAll(Mockito.anyList())).then(new Answer<List<Category>>() {
             long sequence = 1;
 
@@ -94,6 +100,7 @@ class CategoryServiceTest {
             }
         });
 
+        // save
         lenient().when(categoryRepository.save(Mockito.any(Category.class))).then(new Answer<Category>() {
             long sequence = 1;
 
@@ -107,6 +114,7 @@ class CategoryServiceTest {
             }
         });
 
+        // delete by id
         lenient().doAnswer((Answer<Long>) invocation -> {
             long id = invocation.getArgument(0, Long.class);
             if (categories.isEmpty()) {
@@ -116,6 +124,7 @@ class CategoryServiceTest {
             return id;
         }).when(categoryRepository).deleteById(Mockito.any(Long.class));
 
+        // delete
         lenient().doAnswer((Answer<Category>) invocation -> {
             Category categoryToDel = invocation.getArgument(0, Category.class);
             if (categories.isEmpty()) {
@@ -125,11 +134,16 @@ class CategoryServiceTest {
             return categoryToDel;
         }).when(categoryRepository).delete(Mockito.any(Category.class));
 
+
+        // find all, all for user, paged
         lenient().when(categoryRepository.findAll()).then((Answer) invocation -> categories);
+        Page<Category> categoryPage = Mockito.mock(Page.class);
+        lenient().when(categoryRepository.findAll(Mockito.any(Pageable.class))).thenReturn(categoryPage);
         lenient().when(categoryRepository.findAllByUserId(Mockito.anyLong()))
                 .then((Answer) invocation ->
                         categories.stream().filter(cat -> cat.getUserId().equals(invocation.getArgument(0, Long.class)))
                                 .collect(Collectors.toList()));
+        lenient().when(categoryRepository.findAllByUserId(Mockito.any(Pageable.class), Mockito.anyLong())).thenReturn(categoryPage);
     }
 
     @AfterEach
@@ -179,6 +193,12 @@ class CategoryServiceTest {
     }
 
     @Test
+    void getAllCategoriesPaged() {
+        CategoryResponse categoryResponse = categoryService.getAllCategories(1,10);
+        assertNotNull(categoryResponse);
+    }
+
+    @Test
     void getAllCategoriesForUser() {
         int numCategories = 3;
         long userId = 5L;
@@ -195,6 +215,12 @@ class CategoryServiceTest {
         for (CategoryDto categoryDto: foundCategories) {
             assertEquals(userId, categoryDto.getUserId());
         }
+    }
+
+    @Test
+    void getAllCategoriesForUserPaged() {
+        CategoryResponse categoryResponse = categoryService.getAllCategoriesForUser(1L, 1, 10);
+        assertNotNull(categoryResponse);
     }
 
     @Test
@@ -223,7 +249,7 @@ class CategoryServiceTest {
         assertEquals(numCategories * 2, categoryRepository.count());
 
         CategoryDto lookingForCategory = CategoryMapper.mapToCategoryDto(categories.get(1));
-        CategoryDto updatedCategory    = new CategoryDto(0L, "new name", 5, "blue", 44L);
+        CategoryDto updatedCategory    = new CategoryDto(0L, "new name", 5, "blue", 44L, false);
 
         CategoryDto savedCategory = categoryService.updateCategory(
                 lookingForCategory.getName(),

@@ -2,6 +2,7 @@ package eu.dec21.wp.users.service;
 
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.users.dto.UserDto;
+import eu.dec21.wp.users.dto.UserResponse;
 import eu.dec21.wp.users.entity.User;
 import eu.dec21.wp.users.entity.UserDirector;
 import eu.dec21.wp.users.mapper.UserMapper;
@@ -18,6 +19,8 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -51,8 +54,10 @@ class UserServiceTest {
         users = new ArrayList<>();
 //        lenient().when(userRepository.save(Mockito.any(User.class))).thenReturn(users.get(0));
 
+        // count
         lenient().when(userRepository.count()).thenAnswer((Answer) invocation -> (long) users.size());
 
+        // find by id
         lenient().when(userRepository.findById(Mockito.any(Long.class))).then((Answer<Optional<User>>) invocation -> {
             int userId = invocation.getArgument(0, Long.class).intValue();
             if (!users.isEmpty()) {
@@ -65,6 +70,7 @@ class UserServiceTest {
             return Optional.empty();
         });
 
+        // find by email
         lenient().when(userRepository.findByEmail(Mockito.any(String.class))).then((Answer<Optional<User>>) invocation -> {
             String email = invocation.getArgument(0, String.class);
             if (!users.isEmpty()) {
@@ -77,6 +83,7 @@ class UserServiceTest {
             return Optional.empty();
         });
 
+        // save all
         lenient().when(userRepository.saveAll(Mockito.anyList())).then(new Answer<List<User>>() {
             long sequence = 1;
 
@@ -90,6 +97,7 @@ class UserServiceTest {
             }
         });
 
+        // save
         lenient().when(userRepository.save(Mockito.any(User.class))).then(new Answer<User>() {
             long sequence = 1;
 
@@ -103,6 +111,7 @@ class UserServiceTest {
             }
         });
 
+        // delete by id
         lenient().doAnswer((Answer<Long>) invocation -> {
             long id = invocation.getArgument(0, Long.class);
             if (users.isEmpty()) {
@@ -112,7 +121,12 @@ class UserServiceTest {
             return id;
         }).when(userRepository).deleteById(Mockito.any(Long.class));
 
+        // find all
         lenient().when(userRepository.findAll()).then((Answer) invocation -> users);
+
+        // find paged
+        Page<User> userPage = Mockito.mock(Page.class);
+        lenient().when(userRepository.findAll(Mockito.any(Pageable.class))).thenReturn(userPage);
     }
 
     @AfterEach
@@ -159,6 +173,12 @@ class UserServiceTest {
         assertTrue(userDtoList.get(0).equals(UserMapper.mapToUserDto(users.get(0))));
         assertTrue(userDtoList.get(1).equals(UserMapper.mapToUserDto(users.get(1))));
         assertTrue(userDtoList.get(2).equals(UserMapper.mapToUserDto(users.get(2))));
+    }
+
+    @Test
+    void getAllUsersPaged() {
+        UserResponse userResponse = userService.getAllUser(1,10);
+        assertNotNull(userResponse);
     }
 
     @Test

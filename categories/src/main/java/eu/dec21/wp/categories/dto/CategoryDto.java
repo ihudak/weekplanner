@@ -34,6 +34,10 @@ public class CategoryDto {
     @Min(1)
     private Long userId;
 
+    @Builder.Default
+    @Schema(name="deleted", example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether Category is deleted")
+    private boolean deleted = false;
+
     public boolean equals(CategoryDto c) {
         // different names
         if (!this.name.equals(c.name)) {

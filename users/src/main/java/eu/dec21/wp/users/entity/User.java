@@ -30,4 +30,7 @@ public class User {
 
     @Column(name = "auth_id", length = 255)
     private String authID;
+
+    @Column(name = "suspended")
+    private boolean suspended = false;
 }

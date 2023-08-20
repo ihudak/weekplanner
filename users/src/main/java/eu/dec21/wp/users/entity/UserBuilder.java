@@ -60,6 +60,14 @@ public class UserBuilder {
         return this;
     }
 
+    public UserBuilder setSuspended(boolean suspended) {
+        if (this.user == null) {
+            this.reset();
+        }
+        this.user.setSuspended(suspended);
+        return this;
+    }
+
     public User build() {
         if (this.user == null) {
             this.reset();

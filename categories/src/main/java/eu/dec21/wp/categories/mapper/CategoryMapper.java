@@ -10,7 +10,8 @@ public class CategoryMapper {
                 category.getName(),
                 category.getPriority(),
                 category.getColor(),
-                category.getUserId()
+                category.getUserId(),
+                category.isDeleted()
         );
     }
 
@@ -20,7 +21,8 @@ public class CategoryMapper {
                 categoryDto.getName(),
                 categoryDto.getPriority(),
                 categoryDto.getColor(),
-                categoryDto.getUserId()
+                categoryDto.getUserId(),
+                categoryDto.isDeleted()
         );
     }
 }
