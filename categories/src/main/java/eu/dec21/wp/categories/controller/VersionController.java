@@ -12,9 +12,9 @@ import eu.dec21.wp.model.Version;
 @RequestMapping("/api/v1/version")
 public class VersionController {
     private CategoryService categoryService;
-    @Value("${service.version}")
+    @Value("${application.version}")
     private String svcVer;
-    @Value("${service.date}")
+    @Value("${application.date}")
     private String svcDate;
 
     @GetMapping("")
