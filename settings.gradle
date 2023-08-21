@@ -1,4 +1,4 @@
-rootProject.name = 'wp'
+rootProject.name = 'WeekPlanner'
 
 include 'exceptions'
 include 'common'
