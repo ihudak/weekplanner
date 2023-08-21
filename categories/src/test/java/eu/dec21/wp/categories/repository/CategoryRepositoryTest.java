@@ -11,6 +11,9 @@ import org.springframework.boot.jdbc.EmbeddedDatabaseConnection;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,12 +72,7 @@ class CategoryRepositoryTest {
     void findAllByUserId() {
         long user1 = 1, user2 = 2, user3 = 3;
         int numCatUser1 = 5, numCatUser2 = 7, numCatUser3 = 3;
-        List<Category> categoriesUser1 = categoryDirector.constructRandomCategoriesForUser(user1, numCatUser1);
-        List<Category> categoriesUser2 = categoryDirector.constructRandomCategoriesForUser(user2, numCatUser2);
-        List<Category> categoriesUser3 = categoryDirector.constructRandomCategoriesForUser(user3, numCatUser3);
-        categoryRepository.saveAll(categoriesUser1);
-        categoryRepository.saveAll(categoriesUser2);
-        categoryRepository.saveAll(categoriesUser3);
+        this.genMultiuser(new int[]{numCatUser1, numCatUser2, numCatUser3});
 
         assertEquals(numCatUser1 + numCatUser2 + numCatUser3, categoryRepository.count());
 
@@ -82,6 +80,29 @@ class CategoryRepositoryTest {
         assertEquals(numCatUser1, foundCategoriesUser1.size());
 
         for (Category category: foundCategoriesUser1) {
+            assertEquals(user1, category.getUserId());
+        }
+    }
+
+    @Test
+    void findAllByUserIdPaged() {
+        long user1 = 1, user2 = 2, user3 = 3;
+        int numCatUser1 = 15, numCatUser2 = 3, numCatUser3 = 3;
+        this.genMultiuser(new int[]{numCatUser1, numCatUser2, numCatUser3});
+
+        assertEquals(numCatUser1 + numCatUser2 + numCatUser3, categoryRepository.count());
+
+        Pageable pageable = PageRequest.of(2, 4);
+        Page<Category> categories = categoryRepository.findAllByUserId(pageable, user1);
+
+        assertEquals(4, categories.getTotalPages());
+        assertEquals(numCatUser1, categories.getTotalElements());
+        assertEquals(2, categories.getNumber());
+        assertEquals(4, categories.getNumberOfElements());
+        List<Category> categoryList = categories.getContent();
+        assertEquals(4, categoryList.size());
+
+        for(Category category: categoryList) {
             assertEquals(user1, category.getUserId());
         }
     }
@@ -175,5 +196,12 @@ class CategoryRepositoryTest {
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             categoryRepository.save(category);
         });
+    }
+
+    private void genMultiuser(int[] numCats) {
+        for(int i = 0; i < numCats.length; i++) {
+            List<Category> categories = categoryDirector.constructRandomCategoriesForUser((long)i + 1,numCats[i]);
+            categoryRepository.saveAll(categories);
+        }
     }
 }
