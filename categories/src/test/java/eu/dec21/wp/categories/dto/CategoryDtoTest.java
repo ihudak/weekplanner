@@ -17,6 +17,10 @@ class CategoryDtoTest {
         assertEquals(1L, category.getId());
         category.setId(-1L);
         assertEquals(-1L, category.getId());
+        category.setId(0L);
+        assertEquals(0L, category.getId());
+        category.setId(-1000000L);
+        assertEquals(-1000000L, category.getId());
     }
 
     @Test
@@ -34,6 +38,15 @@ class CategoryDtoTest {
         category.setPriority(200);
         assertEquals(200, category.getPriority());
 
+        category.setPriority(100);
+        assertEquals(100, category.getPriority());
+
+        category.setPriority(99);
+        assertEquals(99, category.getPriority());
+
+        category.setPriority(0);
+        assertEquals(0, category.getPriority());
+
         category.setPriority(-1);
         assertEquals(-1, category.getPriority());
     }
@@ -44,6 +57,9 @@ class CategoryDtoTest {
 
         category.setColor("BooBooBooBooBooBooBooBooBo");
         assertEquals("BooBooBooBooBooBooBooBooBo", category.getColor());
+
+        category.setColor("");
+        assertEquals("", category.getColor());
     }
 
     @Test

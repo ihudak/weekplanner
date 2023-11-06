@@ -76,11 +76,16 @@ class CategoryRepositoryTest {
 
         assertEquals(numCatUser1 + numCatUser2 + numCatUser3, categoryRepository.count());
 
-        List<Category> foundCategoriesUser1 = categoryRepository.findAllByUserId(user1);
-        assertEquals(numCatUser1, foundCategoriesUser1.size());
-
-        for (Category category: foundCategoriesUser1) {
+        List<Category> foundCategoriesUser = categoryRepository.findAllByUserId(user1);
+        assertEquals(numCatUser1, foundCategoriesUser.size());
+        for (Category category: foundCategoriesUser) {
             assertEquals(user1, category.getUserId());
+        }
+
+        foundCategoriesUser = categoryRepository.findAllByUserId(user2);
+        assertEquals(numCatUser2, foundCategoriesUser.size());
+        for (Category category: foundCategoriesUser) {
+            assertEquals(user2, category.getUserId());
         }
     }
 
@@ -101,9 +106,20 @@ class CategoryRepositoryTest {
         assertEquals(4, categories.getNumberOfElements());
         List<Category> categoryList = categories.getContent();
         assertEquals(4, categoryList.size());
-
         for(Category category: categoryList) {
             assertEquals(user1, category.getUserId());
+        }
+
+        pageable = PageRequest.of(0, 20);
+        categories = categoryRepository.findAllByUserId(pageable, user2);
+        assertEquals(1, categories.getTotalPages());
+        assertEquals(numCatUser2, categories.getTotalElements());
+        assertEquals(0, categories.getNumber());
+        assertEquals(numCatUser2, categories.getNumberOfElements());
+        categoryList = categories.getContent();
+        assertEquals(numCatUser2, categoryList.size());
+        for(Category category: categoryList) {
+            assertEquals(user2, category.getUserId());
         }
     }
 

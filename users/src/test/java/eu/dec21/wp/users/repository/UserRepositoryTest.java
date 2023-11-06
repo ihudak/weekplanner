@@ -146,6 +146,23 @@ class UserRepositoryTest {
     }
 
     @Test
+    void authIDTooLong() {
+        var user = userDirector.constructRandomUser();
+
+        String normName = getRandStr(255);
+        String longName = getRandStr(256);
+
+        user.setAuthID(normName);
+        var usr = userRepository.save(user);
+        assertEquals(normName, usr.getAuthID());
+
+        user.setAuthID(longName);
+        assertThrowsExactly(DataIntegrityViolationException.class, () -> {
+            userRepository.save(user);
+        });
+    }
+
+    @Test
     void emailMustExist() {
         // build user w/o email
         var user = userBuilder.reset()
@@ -155,5 +172,20 @@ class UserRepositoryTest {
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             userRepository.save(user);
         });
+    }
+
+    @Test
+    void suspendedWorks() {
+        var user = userBuilder.reset()
+                .setFirstName(faker.name().firstName())
+                .setLastName(faker.name().lastName())
+                .setEmail(faker.internet().emailAddress())
+                .build();
+        assertFalse(user.isSuspended());
+        user.setSuspended(true);
+        userRepository.save(user);
+
+        var user1 = userRepository.findByEmail(user.getEmail());
+        assertTrue(user1.get().isSuspended());
     }
 }
