@@ -1,6 +1,7 @@
 package eu.dec21.wp.users.controller;
 
 import eu.dec21.wp.users.dto.UserDto;
+import eu.dec21.wp.users.dto.UserResponse;
 import eu.dec21.wp.users.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,9 +34,11 @@ public class UserController {
 
     @GetMapping("")
     @Operation(summary = "Get all Users")
-    public ResponseEntity<List<UserDto>> getAllUsers() {
-        List<UserDto> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<UserResponse> getAllUsers(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        return new ResponseEntity<>(userService.getAllUser(pageNo, pageSize), HttpStatus.OK);
     }
 
     @PutMapping("{id}")

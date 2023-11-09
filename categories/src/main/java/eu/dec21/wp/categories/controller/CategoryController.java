@@ -1,6 +1,7 @@
 package eu.dec21.wp.categories.controller;
 
 import eu.dec21.wp.categories.dto.CategoryDto;
+import eu.dec21.wp.categories.dto.CategoryResponse;
 import eu.dec21.wp.categories.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,8 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -33,9 +32,11 @@ public class CategoryController {
 
     @GetMapping("")
     @Operation(summary = "Get all Categories")
-    public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        List<CategoryDto> categories = categoryService.getAllCategories();
-        return ResponseEntity.ok(categories);
+    public ResponseEntity<CategoryResponse> getAllCategories(
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+    ) {
+        return new ResponseEntity<>(categoryService.getAllCategories(pageNo, pageSize), HttpStatus.OK);
     }
 
     @PutMapping("{id}")
