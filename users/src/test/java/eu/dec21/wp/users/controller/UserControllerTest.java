@@ -11,7 +11,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,10 +26,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -59,7 +59,7 @@ public class UserControllerTest {
 
     @Test
     public void UserController_CreateUser_ReturnCreated() throws Exception {
-        given(userService.createUser(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArgument(0));
+        given(userService.createUser(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         users.add(userDirector.constructRandomUser());
         UserDto userDto = UserMapper.mapToUserDto(users.get(0));
@@ -69,6 +69,26 @@ public class UserControllerTest {
                 .content(objectMapper.writeValueAsString(userDto)));
 
         response.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName", CoreMatchers.is(userDto.getFirstName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastName", CoreMatchers.is(userDto.getLastName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(userDto.getEmail())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authSystem", CoreMatchers.is(userDto.getAuthSystem())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authID", CoreMatchers.is(userDto.getAuthID())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.suspended", CoreMatchers.is(userDto.isSuspended())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(userDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void UserController_UpdateUser_ReturnUpdated() throws Exception {
+        UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        when(userService.updateUser(any(Long.class), any(UserDto.class))).thenReturn(userDto);
+
+        ResultActions response = mockMvc.perform(put("/api/v1/users/" + userDto.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.firstName", CoreMatchers.is(userDto.getFirstName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.lastName", CoreMatchers.is(userDto.getLastName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(userDto.getEmail())))
@@ -111,5 +131,55 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.[9].suspended", CoreMatchers.is(userDtos.get(9).isSuspended())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.[9].id", CoreMatchers.is(userDtos.get(9).getId().intValue())))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void UserController_UserDetail_ReturnUserDto() throws Exception {
+        UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        when(userService.getUserById(userDto.getId())).thenReturn(userDto);
+
+        ResultActions response = mockMvc.perform(get("/api/v1/users/" + userDto.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName", CoreMatchers.is(userDto.getFirstName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastName", CoreMatchers.is(userDto.getLastName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(userDto.getEmail())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authSystem", CoreMatchers.is(userDto.getAuthSystem())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authID", CoreMatchers.is(userDto.getAuthID())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.suspended", CoreMatchers.is(userDto.isSuspended())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(userDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void UserController_FindUser_ReturnUserDto() throws Exception {
+        UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        when(userService.findUserByEmail(userDto.getEmail())).thenReturn(userDto);
+
+        ResultActions response = mockMvc.perform(get("/api/v1/users/find?email=" + userDto.getEmail())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.firstName", CoreMatchers.is(userDto.getFirstName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.lastName", CoreMatchers.is(userDto.getLastName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email", CoreMatchers.is(userDto.getEmail())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authSystem", CoreMatchers.is(userDto.getAuthSystem())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authID", CoreMatchers.is(userDto.getAuthID())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.suspended", CoreMatchers.is(userDto.isSuspended())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(userDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void UserController_DeleteUser_ReturnString() throws Exception {
+        long userId = 1L;
+        doNothing().when(userService).deleteUser(any(Long.class));
+
+        ResultActions response = mockMvc.perform(delete("/api/v1/users/" + userId)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", CoreMatchers.is("User deleted with ID: " + (int) userId)));
     }
 }

@@ -10,8 +10,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/v1/users")
 @AllArgsConstructor
@@ -59,7 +57,7 @@ public class UserController {
 
     @GetMapping("/find")
     @Operation(summary = "Find User by email address")
-    public ResponseEntity<UserDto> getUserByEmail(@Parameter(name="email", description = "email address", example = "pbrown.gmail.com") @RequestParam String email) {
+    public ResponseEntity<UserDto> getUserByEmail(@Parameter(name="email", description = "email address", example = "pbrown@gmail.com") @RequestParam String email) {
         UserDto userDto = userService.findUserByEmail(email);
         return ResponseEntity.ok(userDto);
     }

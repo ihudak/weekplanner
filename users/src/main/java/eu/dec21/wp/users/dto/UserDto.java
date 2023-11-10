@@ -83,4 +83,14 @@ public class UserDto {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return this.firstName + " " + this.lastName;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.id.intValue();
+    }
 }

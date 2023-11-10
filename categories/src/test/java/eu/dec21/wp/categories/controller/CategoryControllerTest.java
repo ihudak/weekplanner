@@ -11,7 +11,6 @@ import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,10 +26,11 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = CategoryController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -59,7 +59,7 @@ public class CategoryControllerTest {
 
     @Test
     public void CategoryController_CreateCategory_ReturnCreated() throws Exception {
-        given(categoryService.createCategory(ArgumentMatchers.any())).willAnswer(invocation -> invocation.getArgument(0));
+        given(categoryService.createCategory(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         categories.add(categoryDirector.constructRandomCategoryForUser(1L));
         CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categories.get(0));
@@ -69,6 +69,26 @@ public class CategoryControllerTest {
                 .content(objectMapper.writeValueAsString(categoryDto)));
 
         response.andExpect(MockMvcResultMatchers.status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(categoryDto.getName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.priority", CoreMatchers.is(categoryDto.getPriority())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.color", CoreMatchers.is(categoryDto.getColor())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userId", CoreMatchers.is(categoryDto.getUserId().intValue())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.deleted", CoreMatchers.is(categoryDto.isDeleted())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(categoryDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void CategoryController_UpdateCategory_ReturnUpdated() throws Exception {
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        categoryDto.setId(1L);
+        when(categoryService.updateCategory(any(Long.class), any(CategoryDto.class))).thenReturn(categoryDto);
+
+        ResultActions response = mockMvc.perform(put("/api/v1/categories/" + categoryDto.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(categoryDto.getName())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.priority", CoreMatchers.is(categoryDto.getPriority())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.color", CoreMatchers.is(categoryDto.getColor())))
@@ -108,5 +128,55 @@ public class CategoryControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.[9].deleted", CoreMatchers.is(responseDto.getContent().get(9).isDeleted())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content.[9].id", CoreMatchers.is(responseDto.getContent().get(9).getId().intValue())))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void CategoryController_CategoryDetail_ReturnCategoryDto() throws Exception {
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        when(categoryService.getCategoryById(categoryDto.getId())).thenReturn(categoryDto);
+
+
+        ResultActions response = mockMvc.perform(get("/api/v1/categories/" + categoryDto.getId())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(categoryDto.getName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.priority", CoreMatchers.is(categoryDto.getPriority())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.color", CoreMatchers.is(categoryDto.getColor())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userId", CoreMatchers.is(categoryDto.getUserId().intValue())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.deleted", CoreMatchers.is(categoryDto.isDeleted())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(categoryDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void CategoryController_FindCategory_ReturnCategoryDto() throws Exception {
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        when(categoryService.findCategoryByName(categoryDto.getName(), categoryDto.getUserId())).thenReturn(categoryDto);
+
+
+        ResultActions response = mockMvc.perform(get("/api/v1/categories/find?name=" + categoryDto.getName())
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name", CoreMatchers.is(categoryDto.getName())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.priority", CoreMatchers.is(categoryDto.getPriority())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.color", CoreMatchers.is(categoryDto.getColor())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.userId", CoreMatchers.is(categoryDto.getUserId().intValue())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.deleted", CoreMatchers.is(categoryDto.isDeleted())))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(categoryDto.getId().intValue())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void CategoryController_DeleteCategory_ReturnString() throws Exception {
+        long categoryId = 1L;
+        doNothing().when(categoryService).deleteCategory(any(Long.class));
+
+        ResultActions response = mockMvc.perform(delete("/api/v1/categories/" + categoryId)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$", CoreMatchers.is("Category deleted with ID: " + (int) categoryId)));
     }
 }
