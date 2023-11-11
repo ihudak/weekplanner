@@ -173,6 +173,8 @@ class UserServiceTest {
         assertTrue(userDtoList.get(0).equals(UserMapper.mapToUserDto(users.get(0))));
         assertTrue(userDtoList.get(1).equals(UserMapper.mapToUserDto(users.get(1))));
         assertTrue(userDtoList.get(2).equals(UserMapper.mapToUserDto(users.get(2))));
+
+        assertEquals(3, userService.count());
     }
 
     @Test

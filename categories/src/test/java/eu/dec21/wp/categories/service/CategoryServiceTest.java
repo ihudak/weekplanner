@@ -190,6 +190,8 @@ class CategoryServiceTest {
         assertTrue(categoryDtoList.get(0).equals(CategoryMapper.mapToCategoryDto(categories.get(0))));
         assertTrue(categoryDtoList.get(1).equals(CategoryMapper.mapToCategoryDto(categories.get(1))));
         assertTrue(categoryDtoList.get(2).equals(CategoryMapper.mapToCategoryDto(categories.get(2))));
+
+        assertEquals(3, categoryService.count());
     }
 
     @Test
@@ -336,9 +338,6 @@ class CategoryServiceTest {
         categoryRepository.saveAll(categories);
         assertEquals(numCategories, categoryService.count());
     }
-
-
-
 
     private void copyCategoriesToOtherUser(long userId) {
         if (categories.isEmpty())
