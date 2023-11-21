@@ -7,6 +7,7 @@ import eu.dec21.wp.categories.mapper.CategoryMapper;
 import eu.dec21.wp.categories.repository.CategoryRepository;
 import eu.dec21.wp.categories.service.CategoryService;
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
+    @Autowired
     private CategoryRepository categoryRepository;
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {

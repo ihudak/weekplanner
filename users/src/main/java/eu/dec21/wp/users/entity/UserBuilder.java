@@ -36,6 +36,14 @@ public class UserBuilder {
         return this;
     }
 
+    public UserBuilder setPassword(String password) {
+        if (this.user == null) {
+            this.reset();
+        }
+        this.user.setPassword(password);
+        return this;
+    }
+
     public UserBuilder setId(long id) {
         if (this.user == null) {
             this.reset();

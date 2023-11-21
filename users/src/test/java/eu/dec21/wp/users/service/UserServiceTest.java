@@ -1,5 +1,6 @@
 package eu.dec21.wp.users.service;
 
+import eu.dec21.wp.exceptions.BadRequestException;
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.users.dto.UserDto;
 import eu.dec21.wp.users.dto.UserResponse;
@@ -136,7 +137,11 @@ class UserServiceTest {
     @Test
     void createUser() {
         users.add(userDirector.constructRandomUser());
-        UserDto savedUser = userService.createUser(UserMapper.mapToUserDto(users.get(0)));
+        assertThrows(BadRequestException.class, () -> userService.createUser(UserMapper.mapToUserDto(users.get(0))));
+
+        UserDto userDto = UserMapper.mapToUserDto(users.get(0));
+        userDto.setPassword("Sup3RsTr0nGP@s5w0rD!");
+        UserDto savedUser = userService.createUser(userDto);
 
         assertEquals(1,                   savedUser.getId());
 
@@ -185,6 +190,7 @@ class UserServiceTest {
 
     @Test
     void updateUser() {
+        String newPassword = "An0Th3RP@5Sw0rD!";
         users = userDirector.constructRandomUsers(1);
         UserDto userDto = UserMapper.mapToUserDto(userRepository.save(users.get(0)));
         String newName = "Bart";
@@ -193,6 +199,11 @@ class UserServiceTest {
 
         assertEquals(1, userRepository.count());
         assertEquals(newName, users.get(0).getFirstName());
+
+        String oldPassword = users.get(0).getPassword();
+        userDto.setPassword(newPassword);
+        userService.updateUser(userDto.getId(), userDto);
+        assertNotEquals(users.get(0).getPassword(), oldPassword);
 
         assertThrows(ResourceNotFoundException.class, () -> userService.updateUser((long) (users.size() + 1), userDto));
     }

@@ -2,12 +2,14 @@ package eu.dec21.wp.users.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@DynamicUpdate
 @Table(name = "users", uniqueConstraints = { @UniqueConstraint(columnNames = "email"), @UniqueConstraint(columnNames = { "auth_system", "auth_id" } ) } )
 public class User {
 
@@ -24,6 +26,9 @@ public class User {
     @Column(name = "email", nullable = false, unique = true, length = 128)
     @NonNull
     private String email;
+
+    @Column(name = "password", nullable = false)
+    private String password;
 
     @Column(name = "auth_system", length = 12)
     private String authSystem;

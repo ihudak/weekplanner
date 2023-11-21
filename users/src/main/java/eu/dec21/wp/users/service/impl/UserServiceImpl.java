@@ -1,5 +1,6 @@
 package eu.dec21.wp.users.service.impl;
 
+import eu.dec21.wp.exceptions.BadRequestException;
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.users.dto.UserDto;
 import eu.dec21.wp.users.dto.UserResponse;
@@ -7,9 +8,12 @@ import eu.dec21.wp.users.entity.User;
 import eu.dec21.wp.users.mapper.UserMapper;
 import eu.dec21.wp.users.repository.UserRepository;
 import eu.dec21.wp.users.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,11 +21,19 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserServiceImpl implements UserService {
+    @Autowired
     private UserRepository userRepository;
+
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto);
+        if (null == userDto.getPassword() || userDto.getPassword().isEmpty()) {
+            throw new BadRequestException("User must have password: " + userDto.getEmail());
+        }
+
+        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         User savedUser = userRepository.save(user);
         return UserMapper.mapToUserDto(savedUser);
     }
@@ -70,6 +82,10 @@ public class UserServiceImpl implements UserService {
         user.setLastName(updatedUserDto.getLastName());
         user.setAuthSystem(updatedUserDto.getAuthSystem());
         user.setAuthID(updatedUserDto.getAuthID());
+
+        if (null != updatedUserDto.getPassword() && !updatedUserDto.getPassword().isEmpty()) {
+            user.setPassword(passwordEncoder.encode(updatedUserDto.getPassword()));
+        }
 
         User updatedUser = userRepository.save(user);
 

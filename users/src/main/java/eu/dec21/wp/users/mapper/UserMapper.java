@@ -10,6 +10,7 @@ public class UserMapper {
                 user.getFirstName(),
                 user.getLastName(),
                 user.getEmail(),
+                null, // keep password unfetchable
                 user.getAuthSystem(),
                 user.getAuthID(),
                 user.isSuspended()
@@ -22,6 +23,7 @@ public class UserMapper {
                 userDto.getFirstName(),
                 userDto.getLastName(),
                 userDto.getEmail(),
+                null,
                 userDto.getAuthSystem(),
                 userDto.getAuthID(),
                 userDto.isSuspended()

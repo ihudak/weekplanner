@@ -15,6 +15,7 @@ public class UserDirector {
                 .setFirstName(faker.name().firstName())
                 .setLastName(faker.name().lastName())
                 .setEmail(faker.internet().emailAddress())
+                .setPassword(faker.internet().password(8, 15, true, true, true))
                 .setAuthSystem("fb")
                 .setAuthID(faker.internet().uuid())
                 .build();

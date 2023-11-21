@@ -63,6 +63,7 @@ public class UserControllerTest {
 
         users.add(userDirector.constructRandomUser());
         UserDto userDto = UserMapper.mapToUserDto(users.get(0));
+        userDto.setPassword("An0Th3RP@5Sw0rD!");
 
         ResultActions response = mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -82,6 +83,7 @@ public class UserControllerTest {
     @Test
     public void UserController_UpdateUser_ReturnUpdated() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        userDto.setPassword("An0Th3RP@5Sw0rD!");
         when(userService.updateUser(any(Long.class), any(UserDto.class))).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(put("/api/v1/users/" + userDto.getId())

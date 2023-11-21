@@ -31,6 +31,11 @@ public class UserDto {
     @Schema(name = "email", example = "pbrown@gmail.com", requiredMode = Schema.RequiredMode.REQUIRED, description = "email address")
     private String email;
 
+    @Pattern(regexp = Constraints.passwordRegExp)
+    @Size(min = 8)
+    @Schema(name = "password", example = "p@ssw0rD!", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "password")
+    private String password;
+
     @Schema(name = "authSystem", example = "facebook", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Auth system used by the user")
     @Size(max = 12)
     private String authSystem;
@@ -48,6 +53,13 @@ public class UserDto {
             throw new eu.dec21.wp.exceptions.BadRequestException("Invalid email address: " + email);
         }
         this.email = email;
+    }
+
+    public void setPassword(String password) {
+        if (!password.matches(Constraints.passwordRegExp)) {
+            throw new eu.dec21.wp.exceptions.BadRequestException("Password must contain at least 1 lower case, 1 upper case letter, 1 number, 1 special character, and be minimum of 8 characters long");
+        }
+        this.password = password;
     }
 
     public boolean equals(UserDto o) {
