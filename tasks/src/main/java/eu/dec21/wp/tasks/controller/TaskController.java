@@ -51,6 +51,9 @@ public class TaskController {
         if (storedTask == null || !id.equals(storedTask.getTaskId())) {
             throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
         }
+        if (null == task.getTaskId() || !id.equals(task.getTaskId())) {
+            task.setTaskId(id);
+        }
         return new ResponseEntity<>(taskService.save(task), HttpStatus.OK);
     }
 

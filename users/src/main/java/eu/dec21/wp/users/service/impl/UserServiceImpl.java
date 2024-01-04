@@ -12,8 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,7 +22,6 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -33,7 +30,7 @@ public class UserServiceImpl implements UserService {
             throw new BadRequestException("User must have password: " + userDto.getEmail());
         }
 
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        user.setPassword(userDto.getPassword());
         User savedUser = userRepository.save(user);
         return UserMapper.mapToUserDto(savedUser);
     }
@@ -84,7 +81,7 @@ public class UserServiceImpl implements UserService {
         user.setAuthID(updatedUserDto.getAuthID());
 
         if (null != updatedUserDto.getPassword() && !updatedUserDto.getPassword().isEmpty()) {
-            user.setPassword(passwordEncoder.encode(updatedUserDto.getPassword()));
+            user.setPassword(updatedUserDto.getPassword());
         }
 
         User updatedUser = userRepository.save(user);
