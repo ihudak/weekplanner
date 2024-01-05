@@ -135,6 +135,6 @@ public class TaskController {
     @Operation(summary = "Delete Task by ID")
     public ResponseEntity<String> delete(@PathVariable String id) {
         taskService.delete(id);
-        return ResponseEntity.ok("{ taskId: " + id + "}");
+        return ResponseEntity.ok("{ 'taskId': '" + id + "'}");
     }
 }
