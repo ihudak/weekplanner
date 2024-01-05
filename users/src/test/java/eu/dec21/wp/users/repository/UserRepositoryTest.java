@@ -108,6 +108,7 @@ class UserRepositoryTest {
         user.setFirstName(longName);
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
                     userRepository.save(user);
+                    userRepository.flush();
         });
     }
 
@@ -125,6 +126,7 @@ class UserRepositoryTest {
         user.setLastName(longName);
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             userRepository.save(user);
+            userRepository.flush();
         });
     }
 
@@ -133,7 +135,7 @@ class UserRepositoryTest {
         var user = userDirector.constructRandomUser();
 
         String normName = getRandStr(12);
-        String longName = getRandStr(13);
+        String longName = getRandStr(130);
 
         user.setAuthSystem(normName);
         var usr = userRepository.save(user);
@@ -142,6 +144,7 @@ class UserRepositoryTest {
         user.setAuthSystem(longName);
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             userRepository.save(user);
+            userRepository.flush();
         });
     }
 
@@ -159,6 +162,7 @@ class UserRepositoryTest {
         user.setAuthID(longName);
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             userRepository.save(user);
+            userRepository.flush();
         });
     }
 

@@ -153,6 +153,7 @@ class CategoryRepositoryTest {
         category.setName(longName);
         assertThrowsExactly(DataIntegrityViolationException.class, () -> {
             categoryRepository.save(category);
+            categoryRepository.flush();
         });
     }
 
