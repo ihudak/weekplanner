@@ -7,7 +7,7 @@ import eu.dec21.wp.tasks.collection.TaskStates;
 import java.util.List;
 
 public interface TaskService {
-    String save(Task task);
+    Task save(Task task);
     Task getTaskById(String id);
     TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize);
     List<Task> getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state);

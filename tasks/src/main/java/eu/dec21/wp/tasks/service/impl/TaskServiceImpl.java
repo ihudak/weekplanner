@@ -28,8 +28,8 @@ public class TaskServiceImpl implements TaskService {
     private MongoTemplate mongoTemplate;
 
     @Override
-    public String save(Task task) {
-        return taskRepository.save(task).getTaskId();
+    public Task save(Task task) {
+        return taskRepository.save(task);
     }
 
     @Override

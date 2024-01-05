@@ -35,7 +35,7 @@ public class TaskController {
     })
     @PostMapping("")
     @Operation(summary = "Create a new Task")
-    public ResponseEntity<String> create(@RequestBody Task task) {
+    public ResponseEntity<Task> create(@RequestBody Task task) {
         return new ResponseEntity<>(taskService.save(task), HttpStatus.CREATED);
     }
 
@@ -46,7 +46,7 @@ public class TaskController {
     })
     @PutMapping("{id}")
     @Operation(summary = "Update a Task")
-    public ResponseEntity<String> update(@PathVariable("id") String id, @RequestBody Task task) {
+    public ResponseEntity<Task> update(@PathVariable("id") String id, @RequestBody Task task) {
         Task storedTask = taskService.getTaskById(id);
         if (storedTask == null || !id.equals(storedTask.getTaskId())) {
             throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
