@@ -2,6 +2,7 @@ package eu.dec21.wp.tasks.controller;
 
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.tasks.collection.Task;
+import eu.dec21.wp.tasks.collection.TaskIdResponse;
 import eu.dec21.wp.tasks.collection.TaskResponse;
 import eu.dec21.wp.tasks.collection.TaskStates;
 import eu.dec21.wp.tasks.service.TaskService;
@@ -133,8 +134,8 @@ public class TaskController {
     })
     @DeleteMapping("{id}")
     @Operation(summary = "Delete Task by ID")
-    public ResponseEntity<String> delete(@PathVariable String id) {
+    public ResponseEntity<TaskIdResponse> delete(@PathVariable String id) {
         taskService.delete(id);
-        return ResponseEntity.ok("{ 'taskId': '" + id + "'}");
+        return ResponseEntity.ok(new TaskIdResponse(id));
     }
 }
