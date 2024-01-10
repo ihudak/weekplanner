@@ -1,4 +1,12 @@
-rootProject.name = 'WeekPlanner'
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url 'https://artifactory.lab.dynatrace.org/artifactory/dynatrace-gradle-plugins' }
+    }
+}
+
+rootProject.name = 'weekplanner'
 
 include 'exceptions'
 include 'common'
