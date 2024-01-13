@@ -1,10 +1,12 @@
 package eu.dec21.wp.tasks.controller;
 
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
+import eu.dec21.wp.model.Category;
 import eu.dec21.wp.tasks.collection.Task;
 import eu.dec21.wp.tasks.collection.TaskIdResponse;
 import eu.dec21.wp.tasks.collection.TaskResponse;
 import eu.dec21.wp.tasks.collection.TaskStates;
+import eu.dec21.wp.tasks.repository.CategoryRepository;
 import eu.dec21.wp.tasks.service.TaskService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,6 +30,8 @@ public class TaskController {
 
     @Autowired
     private TaskService taskService;
+    @Autowired
+    private CategoryRepository categoryRepository;
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Updated", content = { @Content(schema = @Schema(implementation = Task.class), mediaType = "application/json") }),
@@ -37,6 +41,8 @@ public class TaskController {
     @PostMapping("")
     @Operation(summary = "Create a new Task")
     public ResponseEntity<Task> create(@RequestBody Task task) {
+        // check if the category exists
+        this.verifyCategory(task.getCategoryId());
         return new ResponseEntity<>(taskService.save(task), HttpStatus.CREATED);
     }
 
@@ -52,6 +58,8 @@ public class TaskController {
         if (storedTask == null || !id.equals(storedTask.getTaskId())) {
             throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
         }
+        // check if the category exists
+        this.verifyCategory(task.getCategoryId());
         if (null == task.getTaskId() || !id.equals(task.getTaskId())) {
             task.setTaskId(id);
         }
@@ -95,6 +103,8 @@ public class TaskController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
+        // verify if the category exists
+        this.verifyCategory(categoryId);
         return taskService.getAllTasksByCategoryId(categoryId, pageNo, pageSize);
     }
 
@@ -109,6 +119,8 @@ public class TaskController {
             @Parameter(name="categoryId", description = "Category ID", example = "45") @RequestParam("categoryId") Long categoryId,
             @Parameter(name="state", description = "Task State", example = "DONE") @RequestParam("state") TaskStates state
     ) {
+        // check if the category exists
+        this.verifyCategory(categoryId);
         return taskService.getAllTasksByCategoryIdAndState(categoryId, state);
     }
 
@@ -137,5 +149,21 @@ public class TaskController {
     public ResponseEntity<TaskIdResponse> delete(@PathVariable String id) {
         taskService.delete(id);
         return ResponseEntity.ok(new TaskIdResponse(id));
+    }
+
+    private void verifyCategory(Long id) throws ResourceNotFoundException {
+        // no caching on purpose. Every time fetch category by a rest call
+        Category category = categoryRepository.getCategoryById(id);
+        if (null == category) {
+            throw new ResourceNotFoundException("Category not found by ID: " + id.toString());
+        }
+    }
+
+    // TODO: delete this after Perform
+    private void prepopulateCategories() {
+        categoryRepository.createCategory(0L, "Graal",    30);
+        categoryRepository.createCategory(1L, "Grail",    15);
+        categoryRepository.createCategory(2L, "Apps",     10);
+        categoryRepository.createCategory(3L, "TechFit",   0);
     }
 }

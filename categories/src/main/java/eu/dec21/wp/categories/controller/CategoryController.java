@@ -56,6 +56,7 @@ public class CategoryController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
+        this.prepopulateCategories();
         return new ResponseEntity<>(categoryService.getAllCategories(pageNo, pageSize), HttpStatus.OK);
     }
 
@@ -95,5 +96,15 @@ public class CategoryController {
     public ResponseEntity<CategoryDto> getCategoryByName(@Parameter(name="name", description = "Category or Project name", example = "My Project") @RequestParam String name) {
         CategoryDto categoryDto = categoryService.findCategoryByName(name, 1L);
         return ResponseEntity.ok(categoryDto);
+    }
+
+    // TODO: Remove after Perform
+    private void prepopulateCategories() {
+        if (0 == categoryService.count()) {
+            categoryService.createCategory(new CategoryDto(0L, "Graal",  30, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(1L, "Grail",  15, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(2L, "Apps",   10, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(3L, "TechFit", 0, "bb", 1L, false));
+        }
     }
 }
