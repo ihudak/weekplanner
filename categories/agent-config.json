@@ -1,0 +1,25 @@
+{
+    "runtimeConfig": {
+        "debugInstrumentationNative": false,
+        "debugInstrumentationVerboseNative": false,
+        "debugFilterNative": false,
+        "debugRulesetNative": false,
+        "debugJvmtiEventsNative": false,
+        "debugLogMethodRegistryActivitiesNative": false,
+        "optionEnableServlet5IntrospectionNative": true
+    },
+    "enabledSensors": [
+        "com.compuware.apm.knowledgesensor.java.agentcore",
+        "com.compuware.apm.userdefinedsensor.AGENT_TYPE_JAVA.customservice",
+        "com.compuware.apm.knowledgesensor.java.servlet",
+        "com.compuware.apm.knowledgesensor.java.threading"
+    ],
+    "customRules": [
+        {
+            "class": "eu.dec21.wp.categories.controller.CategoryController",
+            "methods": [
+                { "name": "createCategory", "serviceId": "CreateCategoryCustomService" }
+            ]
+        }
+    ]
+}

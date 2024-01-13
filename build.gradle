@@ -2,8 +2,11 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.1.4' apply(false)
     id 'io.spring.dependency-management' version '1.1.2'
+    id 'org.graalvm.buildtools.native' version '0.9.21' apply(false)
+    id 'com.dynatrace.buildtools.graalnative' version '1.0.0.20231215114326' apply(false)
 }
 
+def globalAgentDir = System.getenv('DT_GRAALNATIVE_AGENT_DIR')?: 'C:/workspaces/agent/test/java/build/product/graalnative'
 
 subprojects {
     apply plugin: 'java'
@@ -39,6 +42,8 @@ project("common") {
 }
 
 project("categories") {
+    apply plugin: 'org.graalvm.buildtools.native'
+    apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         runtimeOnly 'org.postgresql:postgresql'
@@ -46,22 +51,38 @@ project("categories") {
         implementation project(':exceptions')
         testImplementation 'com.h2database:h2'
     }
+    dynatrace {
+        agentDir = globalAgentDir
+        agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
+    }
 }
 
 project("users") {
+    apply plugin: 'org.graalvm.buildtools.native'
+    apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation project(':common')
         implementation project(':exceptions')
         testImplementation 'com.h2database:h2'
     }
+    dynatrace {
+        agentDir = globalAgentDir
+        agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
+    }
 }
 
 project("tasks") {
+    apply plugin: 'org.graalvm.buildtools.native'
+    apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
         implementation project(':common')
         implementation project(':exceptions')
+    }
+    dynatrace {
+        agentDir = globalAgentDir
+        agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
 }
 
@@ -78,4 +99,8 @@ allprojects {
     tasks.named('test') {
         useJUnitPlatform()
     }
+}
+
+tasks.register('dynatraceNativeCompile') {
+    dependsOn(':users:dynatraceNativeCompile', ':tasks:dynatraceNativeCompile', ':categories:dynatraceNativeCompile')
 }
