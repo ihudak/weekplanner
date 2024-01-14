@@ -1,4 +1,4 @@
-const baseSrvUrl = 'http://ls-ub-lf40a22v.dev.lab.dynatrace.org:8083/api/v1';
+const baseSrvUrl = 'http://kubernetes.docker.internal/api/tasks/api/v1';
 export const environment = {
   title: 'Week Planner',
   production: true,

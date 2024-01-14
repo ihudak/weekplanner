@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-adminer
+  namespace: weekplanner
+  labels:
+    app: mysql-adminer
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: mysql-adminer
+  template:
+    metadata:
+      namespace: weekplanner
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      labels:
+        app: mysql-adminer
+    spec:
+      containers:
+        - name: mysql-adminer
+          image: adminer:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ADMINER_DEFAULT_SERVER
+              value: mysql-service
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-adminer-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: mysql-adminer
+  type: LoadBalancer
+  ports:
+    - port: 8082
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 31309

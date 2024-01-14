@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv-volume
+  namespace: weekplanner
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  persistentVolumeReclaimPolicy: Retain
+  # Set it to Delete when removing the volume to delete the files - so it triggers the docker-entrypoint
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/postgres/mnt
+#    type: Directory
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-persistent-claim
+  namespace: weekplanner
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: weekplanner
+  labels:
+    app: postgres
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      namespace: weekplanner
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: pgdb-user-name
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: pgdb-user-pass
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgres-persistent-storage
+              readOnly: false
+            - mountPath: /docker-entrypoint-initdb.d/
+              name: pg-init-path
+              readOnly: true
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: postgres-persistent-storage
+          persistentVolumeClaim:
+            claimName: postgres-persistent-claim
+        - name: pg-init-path
+          hostPath:
+            path: /run/desktop/mnt/host/c/workspaces/projects/demo-apps/wp.srv/databases/postgres/init
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: postgres
+  type: ClusterIP
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+#      nodePort: 31432

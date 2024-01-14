@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-adminer
+  namespace: weekplanner
+  labels:
+    app: postgres-adminer
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: postgres-adminer
+  template:
+    metadata:
+      namespace: weekplanner
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      labels:
+        app: postgres-adminer
+    spec:
+      containers:
+        - name: postgres-adminer
+          image: adminer:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ADMINER_DEFAULT_SERVER
+              value: postgres-service
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-adminer-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: postgres-adminer
+  type: LoadBalancer
+  ports:
+    - port: 8083
+      protocol: TCP
+      targetPort: 8080
+      nodePort: 31310

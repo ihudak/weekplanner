@@ -1,7 +1,7 @@
 FROM ubuntu:jammy
 LABEL org.opencontainers.image.authors="dec21.eu"
 
-ENV EXECUTABLE=categories
+ENV EXECUTABLE=tasks
 
 RUN mkdir -p /opt/app
 WORKDIR /opt/app

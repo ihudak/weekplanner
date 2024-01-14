@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv-volume
+  namespace: weekplanner
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  persistentVolumeReclaimPolicy: Retain
+  # Set it to Delete when removing the volume to delete the files - so it triggers the docker-entrypoint
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/mnt
+#    type: Directory
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-persistent-claim
+  namespace: weekplanner
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: weekplanner
+  labels:
+    app: mysql
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      namespace: weekplanner
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:latest
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-root-name
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-root-pass
+            - name: MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-user-name
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-user-pass
+          volumeMounts:
+            - mountPath: /var/lib/mysql/
+              name: mysql-persistent-storage
+              readOnly: false
+            - mountPath: /docker-entrypoint-initdb.d/
+              name: mysql-init-path
+              readOnly: true
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-persistent-claim
+        - name: mysql-init-path
+          hostPath:
+            path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/init
+            type: Directory
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: mysql
+  type: ClusterIP
+  ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+#      nodePort: 31306

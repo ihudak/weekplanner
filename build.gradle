@@ -1,8 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.4' apply(false)
-    id 'io.spring.dependency-management' version '1.1.2'
-    id 'org.graalvm.buildtools.native' version '0.9.21' apply(false)
+    id 'org.springframework.boot' version '3.2.1' apply(false)
+    id 'io.spring.dependency-management' version '1.1.4'
+    id 'org.graalvm.buildtools.native' version '0.9.28' apply(false)
     id 'com.dynatrace.buildtools.graalnative' version '1.0.0.20231215114326' apply(false)
 }
 
@@ -46,6 +46,7 @@ project("categories") {
     apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+        implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
         runtimeOnly 'org.postgresql:postgresql'
         implementation project(':common')
         implementation project(':exceptions')
@@ -90,7 +91,7 @@ allprojects {
     group = 'eu.dec21'
     version = '0.0.1-SNAPSHOT'
     java {
-        sourceCompatibility = '17'
+        sourceCompatibility = '21'
     }
     repositories {
         mavenCentral()

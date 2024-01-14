@@ -1,0 +1,86 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: weekplanner
+  labels:
+    app: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: weekplanner
+      labels:
+        app: web
+        app.kubernetes.io/version: 1.2.0
+        app.kubernetes.io/part-of: WeekPlanner
+    spec:
+      containers:
+        - name: web
+          image: ivangudak096/weekplanner-web:latest
+          ports:
+            - containerPort: 4200
+          env:
+            - name: DT_RELEASE_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            - name: DT_RELEASE_BUILD_VERSION
+              value: "2023-10-31-03:40:50"
+            - name: WP_ACTIVE_WEB_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: web_app_profile
+            - name: WEEKPLAN_BASE_SRV_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: services_ext_url
+            - name:   TENANT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: tenant_id
+            - name: TENANT_LAYER
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: tenant_layer
+            - name: TENANT_URL
+              value: "https://$(TENANT_ID).$(TENANT_LAYER).dynatracelabs.com"
+            - name: OA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: oneagent-token
+          resources:
+            limits:
+              cpu: 500m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-svc
+  namespace: weekplanner
+spec:
+  selector:
+    app: web
+  type: ClusterIP # LoadBalancer
+  ports:
+    - port: 90
+      protocol: TCP
+      targetPort: 4200
+#      nodePort: 30000 # comment if ClusterIP

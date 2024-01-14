@@ -12,8 +12,8 @@ import lombok.Setter;
 public class Category implements Model {
     private long id;
     private String name;
-    private Integer priority;
+    private int priority;
     private String color;
-    private Long userId;
-    private Boolean deleted = false;
+    private long userId;
+    private boolean deleted = false;
 }

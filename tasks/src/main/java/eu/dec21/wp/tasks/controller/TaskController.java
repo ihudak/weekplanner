@@ -161,9 +161,9 @@ public class TaskController {
 
     // TODO: delete this after Perform
     private void prepopulateCategories() {
-        categoryRepository.createCategory(0L, "Graal",    30);
-        categoryRepository.createCategory(1L, "Grail",    15);
-        categoryRepository.createCategory(2L, "Apps",     10);
-        categoryRepository.createCategory(3L, "TechFit",   0);
+        categoryRepository.createCategory(1L, "Graal",    30);
+        categoryRepository.createCategory(2L, "Grail",    15);
+        categoryRepository.createCategory(3L, "Apps",     10);
+        categoryRepository.createCategory(4L, "TechFit",   0);
     }
 }

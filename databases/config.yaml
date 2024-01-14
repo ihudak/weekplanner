@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weekplanner-configmap
+  namespace: weekplanner
+data:
+  mysql_server: mysql-service
+  pgdb_server: postgres-service
+  mongo_server: mongo-service

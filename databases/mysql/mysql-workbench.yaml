@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-workbench
+  namespace: weekplanner
+  labels:
+    app: mysql-workbench
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: mysql-workbench
+  template:
+    metadata:
+      namespace: weekplanner
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      labels:
+        app: mysql-workbench
+    spec:
+      containers:
+        - name: mysql-workbench
+          image: linuxserver/mysql-workbench:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: CUSTOM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-user-pass
+            - name: PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mysql-user-pass
+          resources:
+            limits:
+              cpu: 200m
+              memory: 256Mi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-workbench-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: mysql-workbench
+  type: LoadBalancer
+  ports:
+    - port: 8085
+      protocol: TCP
+      targetPort: 3000
+      nodePort: 31312

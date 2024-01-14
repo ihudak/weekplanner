@@ -101,10 +101,10 @@ public class CategoryController {
     // TODO: Remove after Perform
     private void prepopulateCategories() {
         if (0 == categoryService.count()) {
-            categoryService.createCategory(new CategoryDto(0L, "Graal",  30, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(1L, "Grail",  15, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(2L, "Apps",   10, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(3L, "TechFit", 0, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(1L, "Graal",  30, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(2L, "Grail",  15, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(3L, "Apps",   10, "bb", 1L, false));
+            categoryService.createCategory(new CategoryDto(4L, "TechFit", 0, "bb", 1L, false));
         }
     }
 }

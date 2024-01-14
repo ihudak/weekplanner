@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: weekplanner-configmap
+  namespace: weekplanner
+data:
+  mysql_server: mysql-service
+  pgdb_server: postgres-service
+  mongo_server: mongo-service
+  categories_svc: categories-svc:81
+  tasks_svc: tasks-svc:82
+  tenant_id: pae32231
+  tenant_layer: dev # dev | sprint
+  weekplanner_profile: prod # prod | stage | dev -- logging levels -- prod:ERROR; stage:INFO; dev:DEBUG
+  web_app_profile: production # production|staging|development|custom -- production (k8s docker desktop w Ingress) | staging (k8s docker desktop w/o Ingress) | development (w/o kubernetes)
+  services_ext_url: http://localhost # if web_app_profile==custom, this is the base EXTERNAL URL where microservices APIs can be found by the web app
