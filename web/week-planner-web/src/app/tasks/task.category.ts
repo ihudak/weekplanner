@@ -1,5 +1,6 @@
 export enum TaskCategory {
-  'Graal' = 1,
+  'None',
+  'Graal',
   'Grail',
   'Apps',
   'TechFit'

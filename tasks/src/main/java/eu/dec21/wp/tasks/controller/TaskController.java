@@ -88,6 +88,7 @@ public class TaskController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
+        categoryRepository.getAllCategories();
         return taskService.findAll(pageNo, pageSize);
     }
 
@@ -153,7 +154,7 @@ public class TaskController {
 
     private void verifyCategory(Long id) throws ResourceNotFoundException {
         // no caching on purpose. Every time fetch category by a rest call
-        categoryRepository.getCategoryById(id);
+        categoryRepository.getCategoryById(id == 0L ? 1L : id);
     }
 
     // TODO: delete this after Perform
