@@ -54,12 +54,12 @@ public class CategoryRepository {
         return category;
     }
 
-    public Category[] getAllCategories() {
+    public Object[] getAllCategories() {
         if(logger.isInfoEnabled()) {
             logger.info("Getting all categories");
         }
 
-        return restTemplate.getForObject(categoryBaseURL, Category[].class);
+        return restTemplate.getForObject(categoryBaseURL, Object[].class);
     }
 
     // TODO: remove after Perform
