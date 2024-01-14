@@ -14,7 +14,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/mnt
+    path: /run/desktop/mnt/host/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/mnt
 #    type: Directory
 ---
 apiVersion: v1
@@ -99,7 +99,7 @@ spec:
             claimName: mysql-persistent-claim
         - name: mysql-init-path
           hostPath:
-            path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/init
+            path: /run/desktop/mnt/host/c/workspaces/projects/demo-apps/wp.srv/databases/mysql/init
             type: Directory
 ---
 apiVersion: v1

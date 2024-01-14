@@ -14,7 +14,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mongo/mnt
+    path: /run/desktop/mnt/host/c/workspaces/projects/demo-apps/wp.srv/databases/mongo/mnt
 #    type: Directory
 ---
 apiVersion: v1
@@ -89,7 +89,7 @@ spec:
             claimName: mongo-persistent-claim
 #        - name: mongo-init-path
 #          hostPath:
-#            path: /mnt/c/workspaces/projects/demo-apps/wp.srv/databases/mongo/init
+#            path: /run/desktop/mnt/host/c/workspaces/projects/demo-apps/wp.srv/databases/mongo/init
 #            type: Directory
 ---
 apiVersion: v1

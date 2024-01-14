@@ -22,13 +22,13 @@ public class CategoryRepository {
         restTemplate = new RestTemplate();
     }
 
-    public Category getCategoryById(Long categoryId) throws ResourceNotFoundException {
+    public Object getCategoryById(Long categoryId) throws ResourceNotFoundException {
         String url = categoryBaseURL + "/" + categoryId.toString();
         if(logger.isInfoEnabled()) {
             logger.info("Getting category " + categoryId.toString());
         }
 
-        Category category = restTemplate.getForObject(url, Category.class);
+        Object category = restTemplate.getForObject(url, Object.class);
 
         if (null == category) {
             ResourceNotFoundException ex = new ResourceNotFoundException("Category not found by ID: " + categoryId.toString());

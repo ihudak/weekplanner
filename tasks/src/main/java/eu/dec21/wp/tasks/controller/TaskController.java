@@ -153,10 +153,7 @@ public class TaskController {
 
     private void verifyCategory(Long id) throws ResourceNotFoundException {
         // no caching on purpose. Every time fetch category by a rest call
-        Category category = categoryRepository.getCategoryById(id);
-        if (null == category) {
-            throw new ResourceNotFoundException("Category not found by ID: " + id.toString());
-        }
+        categoryRepository.getCategoryById(id);
     }
 
     // TODO: delete this after Perform
