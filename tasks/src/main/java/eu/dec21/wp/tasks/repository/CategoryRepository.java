@@ -64,7 +64,8 @@ public class CategoryRepository {
 
     // TODO: remove after Perform
     public boolean anyCategory() {
-        return Arrays.stream(this.getAllCategories()).sequential().findAny().isPresent();
+        this.getAllCategories();
+        return true;
     }
 
     // TODO: remove after Perform
