@@ -1,7 +1,6 @@
 package eu.dec21.wp.tasks.controller;
 
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
-import eu.dec21.wp.model.Category;
 import eu.dec21.wp.tasks.collection.Task;
 import eu.dec21.wp.tasks.collection.TaskIdResponse;
 import eu.dec21.wp.tasks.collection.TaskResponse;

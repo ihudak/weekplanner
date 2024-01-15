@@ -23,4 +23,5 @@ ENTRYPOINT export TENANT_URL=$(echo "$TENANT_URL" | sed -E 's/[ '\$'/'']+\$//') 
            grep tenantToken | \
            sed s/\ \ \"tenantToken\"\ :\ \"// | sed s/\",//) && \
            export DT_AGENT_OPTIONS=tenant=$TENANT_ID,tenantToken=$TENANT_TOKEN,server="https://$TENANT_ID.$TENANT_LAYER.dynatracelabs.com:443" && \
+           echo $DT_AGENT_OPTIONS && \
            "./$EXECUTABLE"
