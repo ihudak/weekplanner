@@ -90,6 +90,9 @@
             },
             "development": {
               "browserTarget": "week-planner-web:build:development"
+            },
+            "staging": {
+              "browserTarget": "week-planner-web:build:staging"
             }
           },
           "defaultConfiguration": "development"

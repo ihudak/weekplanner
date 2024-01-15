@@ -1,0 +1,201 @@
+#apiVersion: apps/v1
+#kind: Deployment
+#metadata:
+#  name: mysql
+#  namespace: weekplanner
+#  labels:
+#    app: mysql
+#spec:
+#  replicas:  1
+#  selector:
+#    matchLabels:
+#      app: mysql
+#  template:
+#    metadata:
+#      annotations:
+#        metrics.dynatrace.com/path: /stats/prometheus
+#        metrics.dynatrace.com/port: "15020"
+#        metrics.dynatrace.com/scrape: "true"
+#        metrics.dynatrace.com/secure: "false"
+#      namespace: weekplanner
+#      labels:
+#        app: mysql
+#        app.kubernetes.io/version: 1.0.0
+#        app.kubernetes.io/part-of: WeekPlanner
+#    spec:
+#      containers:
+#        - name: mysql
+#          image: ivangudak096/wp-mysql
+#          ports:
+#            - containerPort: 3306
+#          env:
+#            - name: MYSQL_ROOT_USER
+#              valueFrom:
+#                secretKeyRef:
+#                  name: weekplanner-secret
+#                  key: mysql-user-name
+#            - name: MYSQL_ROOT_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: weekplanner-secret
+#                  key: mysql-user-pass
+#            - name: MYSQL_USER
+#              valueFrom:
+#                secretKeyRef:
+#                  name: weekplanner-secret
+#                  key: mysql-user-name
+#            - name: MYSQL_PASSWORD
+#              valueFrom:
+#                secretKeyRef:
+#                  name: weekplanner-secret
+#                  key: mysql-user-pass
+#          resources:
+#            limits:
+#              cpu: 500m
+#              memory: 1Gi
+#            requests:
+#              cpu: 200m
+#              memory: 256Mi
+#---
+#apiVersion: v1
+#kind: Service
+#metadata:
+#  name: mysql-service
+#  namespace: weekplanner
+#spec:
+#  selector:
+#    app: mysql
+#  type: ClusterIP # LoadBalancer
+#  ports:
+#    - port: 3306
+#      protocol: TCP
+#      targetPort: 3306
+##      nodePort: 31306 # comment if ClusterIP
+#---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: weekplanner
+  labels:
+    app: postgres
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: weekplanner
+      labels:
+        app: postgres
+        app.kubernetes.io/version: 1.0.0
+        app.kubernetes.io/part-of: WeekPlanner
+    spec:
+      containers:
+        - name: postgres
+          image: ivangudak096/wp-postgres:latest
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: pgdb-user-name
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: pgdb-user-pass
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: postgres
+  type: ClusterIP # LoadBalancer
+  ports:
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
+#      nodePort: 31432 # comment if ClusterIP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongo
+  namespace: weekplanner
+  labels:
+    app: mongo
+spec:
+  replicas:  1
+  selector:
+    matchLabels:
+      app: mongo
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: weekplanner
+      labels:
+        app: mongo
+        app.kubernetes.io/version: 1.0.0
+        app.kubernetes.io/part-of: WeekPlanner
+    spec:
+      containers:
+        - name: mongo
+          image: mongo:latest
+          ports:
+            - containerPort: 27017
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mongo-user-name
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: weekplanner-secret
+                  key: mongo-user-pass
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-service
+  namespace: weekplanner
+spec:
+  selector:
+    app: mongo
+  type: ClusterIP # LoadBalancer
+  ports:
+    - port: 27017
+      protocol: TCP
+      targetPort: 27017
+#      nodePort: 31432 # comment if ClusterIP
