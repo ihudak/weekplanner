@@ -12,6 +12,8 @@
         "com.compuware.apm.knowledgesensor.java.agentcore",
         "com.compuware.apm.userdefinedsensor.AGENT_TYPE_JAVA.customservice",
         "com.compuware.apm.knowledgesensor.java.servlet",
+        "com.compuware.apm.knowledgesensor.java.http",
+        "com.compuware.apm.knowledgesensor.java.nosql.mongodb",
         "com.compuware.apm.knowledgesensor.java.threading"
     ],
     "customRules": [
