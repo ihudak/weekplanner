@@ -6,7 +6,8 @@
         "debugRulesetNative": false,
         "debugJvmtiEventsNative": false,
         "debugLogMethodRegistryActivitiesNative": false,
-        "optionEnableServlet5IntrospectionNative": true
+        "optionEnableServlet5IntrospectionNative": true,
+        "optionEnableApacheHttpClient5xSupportNative": true
     },
     "enabledSensors": [
         "com.compuware.apm.knowledgesensor.java.agentcore",
