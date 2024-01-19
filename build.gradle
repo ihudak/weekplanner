@@ -3,7 +3,7 @@ plugins {
     id 'org.springframework.boot' version '3.1.8' apply(false)
     id 'io.spring.dependency-management' version '1.1.4'
     id 'org.graalvm.buildtools.native' version '0.9.28' apply(false)
-    id 'com.dynatrace.buildtools.graalnative' version '1.0.0.20231215114326' apply(false)
+    id 'com.dynatrace.buildtools.graalnative' version '1.0.0.20240117-150007' apply(false)
 }
 
 def globalAgentDir = System.getenv('DT_GRAALNATIVE_AGENT_DIR')?: 'C:/workspaces/agent/test/java/build/product/graalnative'
