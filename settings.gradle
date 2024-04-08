@@ -2,7 +2,8 @@ pluginManagement {
     repositories {
         mavenCentral()
         gradlePluginPortal()
-        maven { url 'https://artifactory.lab.dynatrace.org/artifactory/dynatrace-gradle-plugins' }
+//        maven { url 'https://artifactory.lab.dynatrace.org/artifactory/dynatrace-gradle-plugins' }
+        maven { url './plugin' }
     }
 }
 
