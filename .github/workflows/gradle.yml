@@ -37,7 +37,7 @@ jobs:
     - name: Download Dynatrace Plugin and Agent
       run: |
         wget -o buildtools.zip http://graalnative.eastus.cloudapp.azure.com:8080/buildtools.zip
-        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip buildtools.zip
+        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip ./buildtools.zip
         pwd
         ls -la
 
