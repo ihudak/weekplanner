@@ -79,5 +79,9 @@ dist/
 # Package files
 *.jar
 
+# Dynatrace Agent
+*.zip
+plugin/
+
 # Maven
 target/

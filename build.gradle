@@ -55,7 +55,7 @@ project("categories") {
         testImplementation 'com.h2database:h2'
     }
     dynatrace {
-        agentZip = "./linux-x86.zip"
+        agentZip = "./linux-agent.zip"
         //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
@@ -72,7 +72,7 @@ project("users") {
         testImplementation 'com.h2database:h2'
     }
     dynatrace {
-        agentZip = "./linux-x86.zip"
+        agentZip = "./linux-agent.zip"
         //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
@@ -90,7 +90,7 @@ project("tasks") {
 //        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.2'
     }
     dynatrace {
-        agentZip = "./linux-x86.zip"
+        agentZip = "./linux-agent.zip"
         //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }

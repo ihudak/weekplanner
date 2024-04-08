@@ -4,9 +4,9 @@ metadata:
   name: weekplanner-configmap
   namespace: weekplanner
 data:
-  mysql_server: mysql-service
-  pgdb_server: postgres-service
-  mongo_server: mongo-service
+  mysql_server: mysql-service.databases
+  pgdb_server: postgres-service.databases
+  mongo_server: mongo-service.databases
   categories_svc: categories-svc:81
   tasks_svc: tasks-svc:82
   tenant_id: pae32231
