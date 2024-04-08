@@ -25,7 +25,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: ivangudak096/weekplanner-web:latest
+          image: ghcr.io/ihudak/weekplanner-web:latest
           ports:
             - containerPort: 4200
           env:

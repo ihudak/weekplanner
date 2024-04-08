@@ -19,12 +19,19 @@ spec:
               service:
                 name: tasks-svc
                 port:
-                  number: 82
+                  number: 83
           - path: /api/categories/?(.*)
             pathType: ImplementationSpecific
             backend:
               service:
                 name: categories-svc
+                port:
+                  number: 82
+          - path: /api/users/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: tasks-svc
                 port:
                   number: 81
           - path: /?(.*)

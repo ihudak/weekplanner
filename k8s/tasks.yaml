@@ -20,12 +20,12 @@ spec:
       namespace: weekplanner
       labels:
         app: tasks
-        app.kubernetes.io/version: 1.1.6
+        app.kubernetes.io/version: 1.2.0
         app.kubernetes.io/part-of: WeekPlanner
     spec:
       containers:
         - name: tasks
-          image: ivangudak096/weekplanner-tasks:latest
+          image: ghcr.io/ihudak/weekplanner-tasks:latest
           ports:
             - containerPort: 8080
             - containerPort: 5005
@@ -35,7 +35,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
             - name: DT_RELEASE_BUILD_VERSION
-              value: "2024-01-13-21:40:50"
+              value: "2024-04-08-21:40:50"
             - name: WP_PROFILE
               valueFrom:
                 configMapKeyRef:
@@ -157,7 +157,7 @@ spec:
   type: ClusterIP # LoadBalancer
   ports:
     - name: http
-      port: 82
+      port: 83
       protocol: TCP
       targetPort: 8080
 #      nodePort: 30008 # comment if ClusterIP

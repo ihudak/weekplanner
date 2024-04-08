@@ -16,7 +16,7 @@ RUN apt-get update && \
     apt-get install -y curl sed && \
     rm -rf /var/lib/apt/lists/*
 
-ENTRYPOINT if [ $TENANT_LAYER == "dev" ] || [ $TENANT_LAYER == "dev" ]; then \
+ENTRYPOINT if [ $TENANT_LAYER == "dev" ] || [ $TENANT_LAYER == "sprint" ]; then \
                 export DT_SRV=dynatracelabs.com:443; \
            else \
                 export DT_SRV=dynatrace.com:443; \

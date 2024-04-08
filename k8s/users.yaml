@@ -1,15 +1,15 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: categories
+  name: users
   namespace: weekplanner
   labels:
-    app: categories
+    app: users
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: categories
+      app: users
   template:
     metadata:
       annotations:
@@ -19,13 +19,13 @@ spec:
         metrics.dynatrace.com/secure: "false"
       namespace: weekplanner
       labels:
-        app: categories
+        app: users
         app.kubernetes.io/version: 1.2.0
         app.kubernetes.io/part-of: WeekPlanner
     spec:
       containers:
-        - name: categories
-          image: ghcr.io/ihudak/weekplanner-categories:latest
+        - name: users
+          image: ghcr.io/ihudak/weekplanner-users:latest
           ports:
             - containerPort: 8080
             - containerPort: 5005
@@ -74,7 +74,7 @@ spec:
             - name: WP_PG_PORT
               value: "5432"
             - name: WP_PG_DBNAME
-              value: wp_categories # DB NAME HERE
+              value: none # DB NAME HERE
             - name: WP_PG_USER
               valueFrom:
                 secretKeyRef:
@@ -93,7 +93,7 @@ spec:
             - name: WP_MONGO_PORT
               value: "27017"
             - name: WP_MONGO_DBNAME
-              value: none
+              value: wp_tasks
             - name: WP_MONGO_AUTH_DB
               value: admin
             - name: WP_MONGO_USER
@@ -149,15 +149,15 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: categories-svc
+  name: users-svc
   namespace: weekplanner
 spec:
   selector:
-    app: categories
+    app: users
   type: ClusterIP # LoadBalancer
   ports:
     - name: http
-      port: 82
+      port: 81
       protocol: TCP
       targetPort: 8080
 #      nodePort: 30008 # comment if ClusterIP
