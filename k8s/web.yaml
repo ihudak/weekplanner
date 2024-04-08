@@ -55,8 +55,13 @@ spec:
                 configMapKeyRef:
                   name: weekplanner-configmap
                   key: tenant_layer
+            - name: DT_SRV
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: dt_srv
             - name: TENANT_URL
-              value: "https://$(TENANT_ID).$(TENANT_LAYER).dynatracelabs.com"
+              value: "https://$(TENANT_ID).$(TENANT_LAYER).$(DT_SRV).com"
             - name: OA_TOKEN
               valueFrom:
                 secretKeyRef:
