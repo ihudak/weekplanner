@@ -1,0 +1,69 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
+
+name: Native Graal CI with Gradle
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+    - uses: graalvm/setup-graalvm@v1
+      with:
+        java-version: '21'
+        distribution: 'graalvm'
+        github-token: ${{ secrets.WP_TOKEN }}
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+
+    - name: Download Dynatrace OneAgent
+      run: |
+        PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
+        wget -O linux-agent.zip http://graalnative.eastus.cloudapp.azure.com:8080/linux-$PLATFORM.zip
+      
+    - name: Download Dynatrace Plugin
+      run: |
+        wget -O buildtools.zip http://graalnative.eastus.cloudapp.azure.com:8080/buildtools.zip
+        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip ./buildtools.zip
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew dynatraceNativeCompile
+
+  dependency-submission:
+
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Download Dynatrace Plugin
+      run: |
+        wget -O buildtools.zip http://graalnative.eastus.cloudapp.azure.com:8080/buildtools.zip
+        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip ./buildtools.zip
+
+    # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
+    # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
