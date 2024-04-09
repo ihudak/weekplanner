@@ -19,16 +19,6 @@ on:
         description: Publish to the Github Registry?
         required: false
         default: false
-      agent:
-        type: string
-        description: Dynatrace Agent zip filename
-        required: false
-        default: linux-agent.zip
-      plugin:
-        type: string
-        description: Dynatrace Gradle plugin zip filename
-        required: false
-        default: buildtools.zip
   push:
     tags:
       - 'v*.*.*'
