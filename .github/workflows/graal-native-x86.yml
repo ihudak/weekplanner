@@ -5,7 +5,7 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Native Graal CI with Gradle
+name: Native Graal CI and build Docker
 
 on:
   workflow_dispatch:
@@ -55,7 +55,7 @@ jobs:
 
     - name: Copy build-time Agent
       run: |
-          mkdir agent && mv linux-agent.zip ./agent/ && cd ./agent && unzip ./linux-agent.zip && cp -r graalnative/ ../categories/build/native/ && cp -r graalnative/ ../tasks/build/native/ && cp -r graalnative/ ../build/native/
+          mkdir agent && mv linux-agent.zip ./agent/ && cd ./agent && unzip ./linux-agent.zip && cp -r graalnative/ ../categories/build/native/ && cp -r graalnative/ ../tasks/build/native/ && cp -r graalnative/ ../users/build/native/
         
 
     - name: Set Env Push
