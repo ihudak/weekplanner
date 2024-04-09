@@ -74,7 +74,7 @@ spec:
             - name: WP_PG_PORT
               value: "5432"
             - name: WP_PG_DBNAME
-              value: none # DB NAME HERE
+              value: wp_users # DB NAME HERE
             - name: WP_PG_USER
               valueFrom:
                 secretKeyRef:
@@ -93,7 +93,7 @@ spec:
             - name: WP_MONGO_PORT
               value: "27017"
             - name: WP_MONGO_DBNAME
-              value: wp_tasks
+              value: none
             - name: WP_MONGO_AUTH_DB
               value: admin
             - name: WP_MONGO_USER
@@ -116,6 +116,11 @@ spec:
                 configMapKeyRef:
                   name: weekplanner-configmap
                   key: tasks_svc
+            - name: WP_USERS_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: users_svc
             - name:   TENANT_ID
               valueFrom:
                 configMapKeyRef:

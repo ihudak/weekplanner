@@ -116,6 +116,11 @@ spec:
                 configMapKeyRef:
                   name: weekplanner-configmap
                   key: tasks_svc
+            - name: WP_USERS_SERVER
+              valueFrom:
+                configMapKeyRef:
+                  name: weekplanner-configmap
+                  key: users_svc
             - name:   TENANT_ID
               valueFrom:
                 configMapKeyRef:

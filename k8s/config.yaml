@@ -7,10 +7,12 @@ data:
   mysql_server: mysql-service.databases
   pgdb_server: postgres-service.databases
   mongo_server: mongo-service.databases
-  categories_svc: categories-svc:81
-  tasks_svc: tasks-svc:82
+  categories_svc: categories-svc:82
+  tasks_svc: tasks-svc:83
+  users_svc: users_svc:81
   tenant_id: pae32231
   tenant_layer: dev # dev | sprint
+  dt_srv: dynatracelabs
   weekplanner_profile: prod # prod | stage | dev -- logging levels -- prod:ERROR; stage:INFO; dev:DEBUG
   web_app_profile: production # production|staging|development|custom -- production (k8s docker desktop w Ingress) | staging (k8s docker desktop w/o Ingress) | development (w/o kubernetes)
   services_ext_url: http://localhost # if web_app_profile==custom, this is the base EXTERNAL URL where microservices APIs can be found by the web app
