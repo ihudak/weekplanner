@@ -42,8 +42,8 @@ jobs:
 
     - name: Download Dynatrace OneAgent
       run: |
-        DT_TENANT_URL=$${{ secrets.DT_DEPLOYMENT_URL }}
-        DT_TOKEN=$${{ secrets.DT_DEPLOYMENT_TOKEN }}
+        DT_TENANT_URL=$(echo $${{ secrets.DT_DEPLOYMENT_URL }} | base64 -d)
+        DT_TOKEN=$($${{ secrets.DT_DEPLOYMENT_TOKEN }} | base64 -d)
         BOO="FOO"
         echo $BOO
         echo $DT_TENANT_URL
