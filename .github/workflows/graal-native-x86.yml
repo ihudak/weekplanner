@@ -41,11 +41,10 @@ jobs:
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
     - name: Download Dynatrace OneAgent
-      env:
-        DT_TENANT_URL: $${{ secrets.DT_DEPLOYMENT_URL }}
-        DT_TOKEN: $${{ secrets.DT_DEPLOYMENT_TOKEN }}
-        BOO: "FOO"
       run: |
+        DT_TENANT_URL=$${{ secrets.DT_DEPLOYMENT_URL }}
+        DT_TOKEN=$${{ secrets.DT_DEPLOYMENT_TOKEN }}
+        BOO="FOO"
         echo $BOO
         echo $DT_TENANT_URL
         echo $DT_TOKEN
