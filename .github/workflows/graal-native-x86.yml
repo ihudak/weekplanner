@@ -47,7 +47,7 @@ jobs:
       run: |
         echo URL="$${{ secrets.DT_DEPLOYMENT_URL }}/api/v1/deployment/installer/agent/unix/paas/latest?flavor=default&arch=x86&bitness=64&include=java-graal-native&skipMetadata=true"
         PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
-        curl -X GET "https$${{ secrets.DT_DEPLOYMENT_URL }}/api/v1/deployment/installer/agent/unix/paas/latest?flavor=default&arch=x86&bitness=64&include=java-graal-native&skipMetadata=true" -H "accept: application/octet-stream" -H "Authorization: Api-Token $${{ secrets.DT_DEPLOYMENT_TOKEN }}" -O linux-agent.zip
+        curl -X GET "https$${{ secrets.DT_DEPLOYMENT_URL }}/api/v1/deployment/installer/agent/unix/paas/latest?flavor=default&arch=x86&bitness=64&include=java-graal-native&skipMetadata=true" -H "accept: application/octet-stream" -H "Authorization: Api-Token $${{ secrets.DT_DEPLOYMENT_TOKEN }}" -o linux-agent.zip
 #        wget -O linux-agent.zip http://graalnative.eastus.cloudapp.azure.com:8080/linux-$PLATFORM.zip
 
 #    - name: Download Dynatrace Plugin
