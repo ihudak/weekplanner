@@ -3,7 +3,8 @@ pluginManagement {
         mavenCentral()
         gradlePluginPortal()
 //        maven { url 'https://artifactory.lab.dynatrace.org/artifactory/dynatrace-gradle-plugins' }
-        maven { url './plugin' }
+        maven { url 'https://repo1.maven.org/maven2/com/dynatrace/buildtools/graalnative/' }
+//        maven { url './plugin' }
     }
 }
 
