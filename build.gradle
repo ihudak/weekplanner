@@ -20,13 +20,10 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
-//        implementation 'org.springframework.boot:spring-boot-starter-security'
         implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
-//        implementation 'io.jsonwebtoken:jjwt:0.9.1'
         implementation 'org.projectlombok:lombok:1.18.32'
         annotationProcessor 'org.projectlombok:lombok:1.18.32'
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
-//        runtimeOnly 'io.micrometer:micrometer-registry-dynatrace'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'com.github.javafaker:javafaker:1.0.2'
     }
@@ -56,7 +53,6 @@ project("categories") {
     }
     dynatrace {
         agentZip = "./linux-agent.zip"
-        //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
 }
@@ -75,7 +71,6 @@ project("users") {
     }
     dynatrace {
         agentZip = "./linux-agent.zip"
-        //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
 }
@@ -93,7 +88,6 @@ project("tasks") {
     }
     dynatrace {
         agentZip = "./linux-agent.zip"
-        //agentDir = globalAgentDir
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
 }
