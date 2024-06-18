@@ -1,0 +1,14 @@
+# Use postgres/example user/password credentials
+version: '3.9'
+
+services:
+  pg:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=p@ssw0rD!
+      - POSTGRES_USER=pguser
+      - POSTGRES_DB=wp_categories
