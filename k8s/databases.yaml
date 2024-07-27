@@ -33,22 +33,22 @@
 #              valueFrom:
 #                secretKeyRef:
 #                  name: weekplanner-secret
-#                  key: mysql-user-name
+#                  key: WP_MYSQL_USER
 #            - name: MYSQL_ROOT_PASSWORD
 #              valueFrom:
 #                secretKeyRef:
 #                  name: weekplanner-secret
-#                  key: mysql-user-pass
+#                  key: WP_MYSQL_PASS
 #            - name: MYSQL_USER
 #              valueFrom:
 #                secretKeyRef:
 #                  name: weekplanner-secret
-#                  key: mysql-user-name
+#                  key: WP_MYSQL_USER
 #            - name: MYSQL_PASSWORD
 #              valueFrom:
 #                secretKeyRef:
 #                  name: weekplanner-secret
-#                  key: mysql-user-pass
+#                  key: WP_MYSQL_PASS
 #          resources:
 #            limits:
 #              cpu: 500m
@@ -107,12 +107,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: weekplanner-secret
-                  key: pgdb-user-name
+                  key: WP_PG_USER
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: weekplanner-secret
-                  key: pgdb-user-pass
+                  key: WP_PG_PASS
           resources:
             limits:
               cpu: 500m
@@ -171,12 +171,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: weekplanner-secret
-                  key: mongo-user-name
+                  key: WP_MONGO_USER
             - name: MONGO_INITDB_ROOT_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: weekplanner-secret
-                  key: mongo-user-pass
+                  key: WP_MONGO_PASS
           resources:
             limits:
               cpu: 500m

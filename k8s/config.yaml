@@ -4,15 +4,28 @@ metadata:
   name: weekplanner-configmap
   namespace: weekplanner
 data:
-  mysql_server: mysql-service.databases
-  pgdb_server: postgres-service.databases
-  mongo_server: mongo-service.databases
-  categories_svc: categories-svc:82
-  tasks_svc: tasks-svc:83
-  users_svc: users_svc:81
-  tenant_id: pae32231
-  tenant_layer: dev # dev | sprint
-  dt_srv: dynatracelabs
-  weekplanner_profile: prod # prod | stage | dev -- logging levels -- prod:ERROR; stage:INFO; dev:DEBUG
-  web_app_profile: production # production|staging|development|custom -- production (k8s docker desktop w Ingress) | staging (k8s docker desktop w/o Ingress) | development (w/o kubernetes)
-  services_ext_url: http://localhost # if web_app_profile==custom, this is the base EXTERNAL URL where microservices APIs can be found by the web app
+  WP_MYSQL_SERVER: "mysql-service"
+  WP_PG_SERVER: "postgres-service"
+  WP_MONGO_SERVER: "mongo-service"
+  WP_CATEGORIES_SERVER: "categories-svc:82"
+  WP_TASKS_SERVER: "tasks-svc:83"
+  WP_USERS_SERVER: "users_svc:81"
+  WP_SERVER_ADDR: "localhost" # categories-svc
+  WP_SERVER_PROTO: "http"
+  WP_SERVER_PORT: "8080"
+  WP_MYSQL_PORT: "3306"
+  WP_PG_PORT: "5432"
+  WP_MONGO_PORT: "27017"
+  WP_MONGO_AUTH_DB: "admin"
+  TENANT_ID: "rvq58374"
+  APP_NAME: "WeekPlanner"
+  SVC_SUFFIX: "AOT"
+  SECURITY_CONTEXT: "Plan"
+  COST_CENTER: "PlanningDept"
+  COST_PRODUCT: "Planner"
+  MY_ATTR: "https://github.com/ihudak/weekplanner"
+  TENANT_LAYER: "dev" # dev | sprint
+  DT_SRV: "dynatracelabs"
+  WP_PROFILE: "prod" # prod | stage | dev -- logging levels -- prod:ERROR; stage:INFO; dev:DEBUG
+  web_app_profile: "custom" # production|staging|development|custom -- production (k8s docker desktop w Ingress) | staging (k8s docker desktop w/o Ingress) | development (w/o kubernetes)
+  WEEKPLAN_BASE_SRV_URL: "http://localhost" # if web_app_profile==custom, this is the base EXTERNAL URL where microservices APIs can be found by the web app

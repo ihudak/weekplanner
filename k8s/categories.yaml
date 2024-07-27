@@ -29,6 +29,11 @@ spec:
           ports:
             - containerPort: 8080
             - containerPort: 5005
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+            - secretRef:
+                name: weekplanner-secret
           env:
             - name: DT_RELEASE_VERSION
               valueFrom:
@@ -36,113 +41,16 @@ spec:
                   fieldPath: metadata.labels['app.kubernetes.io/version']
             - name: DT_RELEASE_BUILD_VERSION
               value: "2024-04-08-21:40:50"
-            - name: WP_PROFILE
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: weekplanner_profile
-            - name: WP_SERVER_ADDR
-              value: localhost # categories-svc
-            - name: WP_SERVER_PROTO
-              value: http
-            - name: WP_SERVER_PORT
-              value: "8080"
-            - name: WP_MYSQL_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: mysql_server
-            - name: WP_MYSQL_PORT
-              value: "3306"
-            - name: WP_MYSQL_DBNAME
-              value: none # DB NAME HERE
-            - name: WP_MYSQL_USER
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: mysql-user-name
-            - name: WP_MYSQL_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: mysql-user-pass
-            - name: WP_PG_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: pgdb_server
-            - name: WP_PG_PORT
-              value: "5432"
             - name: WP_PG_DBNAME
               value: wp_categories # DB NAME HERE
-            - name: WP_PG_USER
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: pgdb-user-name
-            - name: WP_PG_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: pgdb-user-pass
-            - name: WP_MONGO_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: mongo_server
-            - name: WP_MONGO_PORT
-              value: "27017"
-            - name: WP_MONGO_DBNAME
-              value: none
-            - name: WP_MONGO_AUTH_DB
-              value: admin
-            - name: WP_MONGO_USER
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: mongo-user-name
-            - name: WP_MONGO_PASS
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: mongo-user-pass
-            - name: WP_CATEGORIES_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: categories_svc
-            - name: WP_TASKS_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: tasks_svc
-            - name: WP_USERS_SERVER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: users_svc
-            - name:   TENANT_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: tenant_id
-            - name: TENANT_LAYER
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: tenant_layer
-            - name: DT_SRV
-              valueFrom:
-                configMapKeyRef:
-                  name: weekplanner-configmap
-                  key: dt_srv
+            - name: SERVICE_NAME
+              value: Categories
+            - name: SERVICE_FULL_NAME
+              value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
             - name: TENANT_URL
               value: "https://$(TENANT_ID).$(TENANT_LAYER).$(DT_SRV).com"
-            - name: OA_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: weekplanner-secret
-                  key: oneagent-token
           resources:
             limits:
               cpu: 500m
