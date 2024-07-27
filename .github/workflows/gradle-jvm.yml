@@ -31,11 +31,6 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
 
-    - name: Download Dynatrace Plugin
-      run: |
-        wget -O buildtools.zip http://graalnative.eastus.cloudapp.azure.com:8080/buildtools.zip
-        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip ./buildtools.zip
-
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
@@ -52,11 +47,6 @@ jobs:
       with:
         java-version: '21'
         distribution: 'temurin'
-
-    - name: Download Dynatrace Plugin
-      run: |
-        wget -O buildtools.zip http://graalnative.eastus.cloudapp.azure.com:8080/buildtools.zip
-        mkdir plugin && mv buildtools.zip ./plugin/ && cd ./plugin && unzip ./buildtools.zip
 
     # Generates and submits a dependency graph, enabling Dependabot Alerts for all project dependencies.
     # See: https://github.com/gradle/actions/blob/main/dependency-submission/README.md
