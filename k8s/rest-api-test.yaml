@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api-test
+  namespace: weekplanner
+  labels:
+    app: rest-api-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rest-api-test
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: weekplanner
+      labels:
+        app: rest-api-test
+        app.kubernetes.io/version: 1.2.0
+        app.kubernetes.io/part-of: WeekPlanner
+    spec:
+      containers:
+        - name: rest-api-test
+          image: ivangudak096/rest-api-test:latest
+          ports:
+            - containerPort: 3000
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+            - secretRef:
+                name: weekplanner-secret
+          env:
+            - name: DT_RELEASE_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            - name: DT_RELEASE_BUILD_VERSION
+              value: "2023-10-31-03:40:50"
+            - name: SERVICE_NAME
+              value: WeekPlanner.api.test
+            - name: OTEL_SERVICE_NAME
+              value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
+            - name: TENANT_URL
+              value: "https://$(TENANT_ID).$(TENANT_LAYER).$(DT_SRV).com"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: rest-api-test-svc
+  namespace: weekplanner
+spec:
+  selector:
+    app: rest-api-test
+  type: ClusterIP # LoadBalancer
+  ports:
+    - port: 91
+      protocol: TCP
+      targetPort: 3000
+#      nodePort: 30000 # comment if ClusterIP

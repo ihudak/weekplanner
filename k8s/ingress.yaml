@@ -41,3 +41,10 @@ spec:
                 name: web-svc
                 port:
                   number: 90
+          - path: /api/test?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: rest-api-test-svc
+                port:
+                  number: 91
