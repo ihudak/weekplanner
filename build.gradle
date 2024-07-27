@@ -1,8 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.10' apply(false)
-    id 'io.spring.dependency-management' version '1.1.4'
-    id 'org.graalvm.buildtools.native' version '0.10.1' apply(false)
+    id 'org.springframework.boot' version '3.1.12' apply(false)
+    id 'io.spring.dependency-management' version '1.1.6'
+    id 'org.graalvm.buildtools.native' version '0.10.2' apply(false)
     id 'com.dynatrace.buildtools.graalnative' version '1.0.0' apply(false)
 }
 
