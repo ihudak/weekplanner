@@ -11,8 +11,9 @@ print_date "Start: " $startTime
 a=""
 while [ "$a" == "" ];
 do
-	a=$(curl -s http://localhost:3000/status);
-	#echo $a;
+	a=$(curl -s http://localhost:3000/test);
+	echo $a;
+	a="";
 done
 endTime=$(date +%s%N)
 print_date "End: " $endTime
