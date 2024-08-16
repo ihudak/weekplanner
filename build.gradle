@@ -92,6 +92,21 @@ project("tasks") {
     }
 }
 
+project("workitems") {
+    apply plugin: 'org.graalvm.buildtools.native'
+    apply plugin: 'com.dynatrace.buildtools.graalnative'
+    dependencies {
+        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
+        implementation project(':common')
+        implementation project(':exceptions')
+        implementation 'com.github.javafaker:javafaker:1.0.2'
+    }
+    dynatrace {
+        agentZip = "./linux-agent.zip"
+        agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
+    }
+}
+
 allprojects {
     group = 'eu.dec21'
     version = '0.0.1-SNAPSHOT'
