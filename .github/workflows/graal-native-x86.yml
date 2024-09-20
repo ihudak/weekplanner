@@ -31,14 +31,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - uses: graalvm/setup-graalvm@v1
+    - uses: graalvm/setup-graalvm@v1.2.2
       with:
         java-version: '21'
         distribution: 'graalvm'
         github-token: ${{ secrets.WP_TOKEN }}
 
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@417ae3ccd767c252f5661f1ace9f835f9654f2b5 # v3.1.0
+      uses: gradle/actions/setup-gradle@v4
 
     - name: Download Dynatrace OneAgent
       run: |
