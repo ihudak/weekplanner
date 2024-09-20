@@ -49,7 +49,7 @@ public class WorkItem {
     }
 
     public long generateId() {
-        if (id == 0) {
+        if (  id == 0) {
             id = faker.random().nextLong();
         }
         return id;
