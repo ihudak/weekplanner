@@ -10,14 +10,8 @@ ENV DT_GRAALNATIVE_AGENT_DIR=/opt/agent
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY build/native/nativeCompile/ .
+COPY build/native/graalnative/runtime/ ./dynatrace/agent/lib64/
 RUN chmod +x "$EXECUTABLE"
-
-RUN touch /opt/app/dynatrace/agent/dt_fips_disabled.flag && \
-    touch /opt/app/dynatrace/agent/any/dt_fips_disabled.flag && \
-    touch /opt/agent/runtime/dt_fips_disabled.flag && \
-    touch /opt/agent/runtime/any/dt_fips_disabled.flag && \
-    touch /opt/agent/buildtime/dt_fips_disabled.flag && \
-    touch /opt/agent/buildtime/any/dt_fips_disabled.flag
 
 RUN apt-get update && \
     apt-get install -y curl sed && \
