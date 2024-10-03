@@ -12,6 +12,13 @@ WORKDIR /opt/app
 COPY build/native/nativeCompile/ .
 RUN chmod +x "$EXECUTABLE"
 
+RUN touch /opt/app/dynatrace/agent/dt_fips_disabled.flag && \
+    touch /opt/app/dynatrace/agent/any/dt_fips_disabled.flag && \
+    touch /opt/agent/runtime/dt_fips_disabled.flag && \
+    touch /opt/agent/runtime/any/dt_fips_disabled.flag && \
+    touch /opt/agent/buildtime/dt_fips_disabled.flag && \
+    touch /opt/agent/buildtime/any/dt_fips_disabled.flag
+
 RUN apt-get update && \
     apt-get install -y curl sed && \
     rm -rf /var/lib/apt/lists/*
