@@ -3,14 +3,9 @@ LABEL org.opencontainers.image.authors="dec21.eu"
 
 ENV EXECUTABLE=tasks
 
-RUN mkdir -p /opt/agent
-COPY build/native/graalnative/ /opt/agent/
-ENV DT_GRAALNATIVE_AGENT_DIR=/opt/agent
-
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
 COPY build/native/nativeCompile/ .
-COPY build/native/graalnative/runtime/ ./dynatrace/agent/lib64/
 RUN chmod +x "$EXECUTABLE"
 
 RUN apt-get update && \
