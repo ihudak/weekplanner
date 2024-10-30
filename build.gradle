@@ -52,7 +52,10 @@ project("categories") {
         testImplementation 'com.h2database:h2'
     }
     dynatrace {
-        agentZip = "./linux-agent.zip"
+        agentDownload {
+            environmentUrl = System.getenv('DT_TENANT_URL')
+            apiToken = System.getenv('DT_TOKEN')
+        }
         agentOptions = System.getenv('DT_GRAALNATIVE_AGENT_OPTIONS')?: "loglevelcon=info,agentconfigpath=${projectDir.absolutePath}/agent-config.json,storage=${projectDir.absolutePath}/build/native/nativeCompile/dt"
     }
 }
