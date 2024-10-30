@@ -40,24 +40,11 @@ jobs:
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v4
 
-#    - name: Download Dynatrace OneAgent
-#      run: |
-#        DT_TENANT_URL=$(echo ${{ secrets.DT_DEPLOYMENT_URL }} | base64 -d)
-#        DT_TOKEN=$(echo ${{ secrets.DT_DEPLOYMENT_TOKEN }} | base64 -d)
-#        PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
-#        curl -X GET "$DT_TENANT_URL/api/v1/deployment/installer/agent/unix/paas/latest?flavor=default&arch=x86&bitness=64&include=java-graal-native&skipMetadata=true" -H "accept: application/octet-stream"  -H "Authorization: Api-Token $DT_TOKEN" -o linux-agent.zip
-
     - name: Build with Gradle Wrapper
       run: |
         export DT_TENANT_URL=$(echo ${{ secrets.DT_DEPLOYMENT_URL }} | base64 -d)
         export DT_TOKEN=$(echo ${{ secrets.DT_DEPLOYMENT_TOKEN }} | base64 -d)
-        export PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
-        ./gradlew dynatraceNativeCompile
-
-#    - name: Copy build-time Agent
-#      run: |
-#        mkdir agent && mv linux-agent.zip ./agent/ && cd ./agent && unzip ./linux-agent.zip && cp -r graalnative/ ../categories/build/native/ && cp -r graalnative/ ../tasks/build/native/ && cp -r graalnative/ ../users/build/native/
-        
+        ./gradlew dynatraceNativeCompile        
 
     - name: Set Env Push
       if: ${{ github.event_name == 'push' }}
