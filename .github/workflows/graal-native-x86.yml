@@ -54,9 +54,9 @@ jobs:
         export PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
         ./gradlew dynatraceNativeCompile
 
-    - name: Copy build-time Agent
-      run: |
-        mkdir agent && mv linux-agent.zip ./agent/ && cd ./agent && unzip ./linux-agent.zip && cp -r graalnative/ ../categories/build/native/ && cp -r graalnative/ ../tasks/build/native/ && cp -r graalnative/ ../users/build/native/
+#    - name: Copy build-time Agent
+#      run: |
+#        mkdir agent && mv linux-agent.zip ./agent/ && cd ./agent && unzip ./linux-agent.zip && cp -r graalnative/ ../categories/build/native/ && cp -r graalnative/ ../tasks/build/native/ && cp -r graalnative/ ../users/build/native/
         
 
     - name: Set Env Push
