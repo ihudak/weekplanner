@@ -49,9 +49,9 @@ jobs:
 
     - name: Build with Gradle Wrapper
       run: |
-        DT_TENANT_URL=$(echo ${{ secrets.DT_DEPLOYMENT_URL }} | base64 -d)
-        DT_TOKEN=$(echo ${{ secrets.DT_DEPLOYMENT_TOKEN }} | base64 -d)
-        PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
+        export DT_TENANT_URL=$(echo ${{ secrets.DT_DEPLOYMENT_URL }} | base64 -d)
+        export DT_TOKEN=$(echo ${{ secrets.DT_DEPLOYMENT_TOKEN }} | base64 -d)
+        export PLATFORM=$(uname -p) && if [ "$PLATFORM" = "arm" ] || [ "$PLATFORM" = "arm64" ] || [ "$PLATFORM" = "aarch64" ]; then export PLATFORM="arm"; elif [ $PLATFORM = "x86" ] || [ $PLATFORM = "x86_64" ] || [ $PLATFORM = "x64" ]; then export PLATFORM="x86"; else export PLATFORM="x86"; fi
         ./gradlew dynatraceNativeCompile
 
     - name: Copy build-time Agent
