@@ -1,5 +1,5 @@
-import { TaskLink } from "./task.link";
-import { TaskState } from "./task.state";
+import {TaskLink} from "./task.link";
+import {TaskState} from "./task.state";
 
 export class Task {
   taskId: string | undefined;

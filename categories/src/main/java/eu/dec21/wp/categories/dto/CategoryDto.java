@@ -55,10 +55,6 @@ public class CategoryDto {
         if (this.color == null && c.color != null || this.color != null && c.color == null) {
             return false;
         }
-        if (this.color != null && !this.color.equals(c.color)) {
-            return false;
-        }
-
-        return true;
+        return this.color == null || this.color.equals(c.color);
     }
 }

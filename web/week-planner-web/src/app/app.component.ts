@@ -3,9 +3,9 @@ import {MatDialog} from "@angular/material/dialog";
 import {TaskAddEditComponent} from "./tasks/task-add-edit/task-add-edit.component";
 import {environment} from "../environments/environment";
 import {TaskService} from "./tasks/task.service";
-import {MatPaginator, MatPaginatorModule} from '@angular/material/paginator';
-import {MatSort, MatSortModule} from '@angular/material/sort';
-import {MatTableDataSource, MatTableModule} from '@angular/material/table';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
+import {MatTableDataSource} from '@angular/material/table';
 import {TaskCategory} from "./tasks/task.category";
 import {CoreService} from "./core/core.service";
 

@@ -15,9 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -40,7 +40,7 @@ public class UserControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private UserService userService;
 
     @Autowired
@@ -64,6 +64,7 @@ public class UserControllerTest {
         users.add(userDirector.constructRandomUser());
         UserDto userDto = UserMapper.mapToUserDto(users.get(0));
         userDto.setPassword("An0Th3RP@5Sw0rD!");
+        userDto.setId(0L);
 
         ResultActions response = mockMvc.perform(post("/api/v1/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -84,6 +85,7 @@ public class UserControllerTest {
     public void UserController_UpdateUser_ReturnUpdated() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
         userDto.setPassword("An0Th3RP@5Sw0rD!");
+        userDto.setId(0L);
         when(userService.updateUser(any(Long.class), any(UserDto.class))).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(put("/api/v1/users/" + userDto.getId())
@@ -105,7 +107,9 @@ public class UserControllerTest {
     public void UserController_GetAllUsers_ReturnResponseDto() throws Exception {
         ArrayList<UserDto> userDtos = new ArrayList<>();
         for (int i = 0; i < 10; i++) {
-            userDtos.add(UserMapper.mapToUserDto(userDirector.constructRandomUser()));
+            UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+            userDto.setId((long) i);
+            userDtos.add(userDto);
         }
 
         UserResponse responseDto = UserResponse.builder().pageSize(10).last(true).pageNo(1).content(userDtos).build();
@@ -138,6 +142,7 @@ public class UserControllerTest {
     @Test
     public void UserController_UserDetail_ReturnUserDto() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        userDto.setId(0L);
         when(userService.getUserById(userDto.getId())).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(get("/api/v1/users/" + userDto.getId())
@@ -157,6 +162,7 @@ public class UserControllerTest {
     @Test
     public void UserController_FindUser_ReturnUserDto() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        userDto.setId(0L);
         when(userService.findUserByEmail(userDto.getEmail())).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(get("/api/v1/users/find?email=" + userDto.getEmail())

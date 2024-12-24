@@ -1,8 +1,11 @@
 package eu.dec21.wp.workitems.entity;
 
 import com.github.javafaker.Address;
-import lombok.*;
 import com.github.javafaker.Faker;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

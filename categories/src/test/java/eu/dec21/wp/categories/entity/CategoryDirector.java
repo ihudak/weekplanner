@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class CategoryDirector {
-    private CategoryBuilder categoryBuilder = new CategoryBuilder();
-    private Faker faker = new Faker();
+    private final CategoryBuilder categoryBuilder = new CategoryBuilder();
+    private final Faker faker = new Faker();
 
     private String getRandStr(int length) {
         return faker.regexify("[A-Z][a-z]{" + (length - 1) + "}");
@@ -21,7 +21,6 @@ public class CategoryDirector {
 
     private CategoryBuilder prepareCategory() {
         return categoryBuilder.reset()
-                .setId(0)
                 .setName(getRandStr(getRantNameLength()))
                 .setPriority(faker.number().numberBetween(Constraints.minPrio, Constraints.maxPrio))
                 .setColor(faker.color().hex())

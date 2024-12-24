@@ -1,9 +1,7 @@
 package eu.dec21.wp.workitems.dto;
 
-import eu.dec21.wp.helper.Constraints;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 

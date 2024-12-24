@@ -6,12 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserDirector {
-    private UserBuilder userBuilder = new UserBuilder();
-    private Faker faker = new Faker();
+    private final UserBuilder userBuilder = new UserBuilder();
+    private final Faker faker = new Faker();
 
     public User constructRandomUser() {
         return userBuilder.reset()
-                .setId(0)
                 .setFirstName(faker.name().firstName())
                 .setLastName(faker.name().lastName())
                 .setEmail(faker.internet().emailAddress())

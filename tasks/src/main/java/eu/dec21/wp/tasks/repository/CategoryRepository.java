@@ -16,10 +16,10 @@ public class CategoryRepository {
     private String categoryBaseURL;
     @Autowired
     private RestTemplate restTemplate;
-    private Logger logger = LoggerFactory.getLogger(CategoryRepository.class);
+    private final Logger logger = LoggerFactory.getLogger(CategoryRepository.class);
 
     public CategoryRepository() {
-
+        restTemplate = new RestTemplate();
     }
 
     public Object getCategoryById(Long categoryId) throws ResourceNotFoundException {

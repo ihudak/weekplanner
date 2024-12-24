@@ -15,9 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
@@ -40,7 +40,7 @@ public class CategoryControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private CategoryService categoryService;
 
     @Autowired
@@ -62,7 +62,8 @@ public class CategoryControllerTest {
         given(categoryService.createCategory(any())).willAnswer(invocation -> invocation.getArgument(0));
 
         categories.add(categoryDirector.constructRandomCategoryForUser(1L));
-        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categories.get(0));
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categories.getFirst());
+        categoryDto.setId(0L);
 
         ResultActions response = mockMvc.perform(post("/api/v1/categories")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -102,7 +103,9 @@ public class CategoryControllerTest {
     public void CategoryController_GetAllCategories_ReturnResponseDto() throws Exception {
         ArrayList<CategoryDto> categoryDtos = new ArrayList<>(); // = CategoryDto.builder().name("Boo").color("red").priority(10).userId(1L).deleted(false).build();
         for (int i = 0; i < 10; i++) {
-            categoryDtos.add(CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L)));
+            CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+            categoryDto.setId((long) i);
+            categoryDtos.add(categoryDto);
         }
 
         CategoryResponse responseDto = CategoryResponse.builder().pageSize(10).last(true).pageNo(1).content(categoryDtos).build();
@@ -133,6 +136,7 @@ public class CategoryControllerTest {
     @Test
     public void CategoryController_CategoryDetail_ReturnCategoryDto() throws Exception {
         CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        categoryDto.setId(0L);
         when(categoryService.getCategoryById(categoryDto.getId())).thenReturn(categoryDto);
 
 
@@ -152,6 +156,7 @@ public class CategoryControllerTest {
     @Test
     public void CategoryController_FindCategory_ReturnCategoryDto() throws Exception {
         CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        categoryDto.setId(0L);
         when(categoryService.findCategoryByName(categoryDto.getName(), categoryDto.getUserId())).thenReturn(categoryDto);
 
 
