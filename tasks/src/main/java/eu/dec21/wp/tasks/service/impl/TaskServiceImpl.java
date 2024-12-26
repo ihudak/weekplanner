@@ -35,7 +35,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return getTastResponse(taskRepository.getAllByCategoryId(categoryId, pageable));
+        return getTaskResponse(taskRepository.getAllByCategoryId(categoryId, pageable));
     }
 
     @Override
@@ -46,7 +46,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public TaskResponse findAll(int pageNo, int pageSize) {
         Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return getTastResponse(taskRepository.findAll(pageable));
+        return getTaskResponse(taskRepository.findAll(pageable));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class TaskServiceImpl implements TaskService {
 
         query.addCriteria(new Criteria().orOperator(criteria));
 
-        return getTastResponse(
+        return getTaskResponse(
                 PageableExecutionUtils.getPage(
                         mongoTemplate.find(query, Task.class),
                         pageable, () -> mongoTemplate.count(query.skip(0).limit(0), Task.class)
@@ -88,7 +88,7 @@ public class TaskServiceImpl implements TaskService {
 
 
 
-    private TaskResponse getTastResponse(Page<Task> tasks) {
+    private TaskResponse getTaskResponse(Page<Task> tasks) {
         List<Task> taskList = tasks.getContent();
 
         TaskResponse taskResponse = new TaskResponse();
@@ -100,5 +100,10 @@ public class TaskServiceImpl implements TaskService {
         taskResponse.setLast(tasks.isLast());
 
         return taskResponse;
+    }
+
+    @Override
+    public long count() {
+        return taskRepository.count();
     }
 }

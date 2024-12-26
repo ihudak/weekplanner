@@ -16,5 +16,5 @@ public interface TaskService {
     TaskResponse searchTasks(String searchString, int pageNo, int pageSize);
 
     void delete(String id);
-
+    long count();
 }

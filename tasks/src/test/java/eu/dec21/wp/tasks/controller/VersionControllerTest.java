@@ -1,7 +1,7 @@
-package eu.dec21.wp.categories.controller;
+package eu.dec21.wp.tasks.controller;
 
-import eu.dec21.wp.categories.service.CategoryService;
 import eu.dec21.wp.model.Version;
+import eu.dec21.wp.tasks.service.TaskService;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +20,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(controllers = VersionController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -35,18 +35,18 @@ public class VersionControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockitoBean
-    CategoryService categoryService;
+    TaskService taskService;
 
     private Version version;
 
     @BeforeEach
     public void init() {
-        version = new Version("categories", svcVer, svcDate, "OK", "Count: 10");
+        version = new Version("tasks", svcVer, svcDate, "OK", "Count: 10");
     }
 
     @Test
-    public void VersionController_GetVersionReturnVersion() throws Exception {
-        when(categoryService.count()).thenReturn(10L);
+    public void VersionController_GetVersionReturnsVersion() throws Exception {
+        when(taskService.count()).thenReturn(10L);
 
         ResultActions response = mockMvc.perform(get("/api/v1/version")
                 .contentType(MediaType.APPLICATION_JSON));
@@ -62,7 +62,7 @@ public class VersionControllerTest {
     }
 
     @Test public void VersionController_GetVersionReturnVersionNotFound() throws Exception {
-        when(categoryService.count()).thenReturn(10L);
+        when(taskService.count()).thenReturn(10L);
 
         ResultActions response = mockMvc.perform(get("/api/v1/version/5")
                 .contentType(MediaType.APPLICATION_JSON));

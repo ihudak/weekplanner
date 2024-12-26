@@ -79,7 +79,7 @@ class CategoryServiceTest {
             long userId = invocation.getArgument(1, Long.class);
             if (!categories.isEmpty()) {
                 for (Category category: categories) {
-                    if(category.getName().equals(name) && category.getUserId().equals(userId)) {
+                    if (category.getName().equals(name) && category.getUserId().equals(userId)) {
                         return Optional.of(category);
                     }
                 }
@@ -142,11 +142,11 @@ class CategoryServiceTest {
 
 
         // find all, all for user, paged
-        lenient().when(categoryRepository.findAll()).then((Answer) invocation -> categories);
+        lenient().when(categoryRepository.findAll()).then((Answer<List<Category>>) invocation -> categories);
         Page<Category> categoryPage = Mockito.mock(Page.class);
         lenient().when(categoryRepository.findAll(Mockito.any(Pageable.class))).thenReturn(categoryPage);
         lenient().when(categoryRepository.findAllByUserId(Mockito.anyLong()))
-                .then((Answer) invocation ->
+                .then((Answer<List<Category>>) invocation ->
                         categories.stream().filter(cat -> cat.getUserId().equals(invocation.getArgument(0, Long.class)))
                                 .collect(Collectors.toList()));
         lenient().when(categoryRepository.findAllByUserId(Mockito.any(Pageable.class), Mockito.anyLong())).thenReturn(categoryPage);

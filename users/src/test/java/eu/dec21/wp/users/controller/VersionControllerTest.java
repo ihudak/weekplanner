@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @WebMvcTest(controllers = VersionController.class)
 @AutoConfigureMockMvc(addFilters = false)
@@ -56,6 +57,31 @@ public class VersionControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.date", CoreMatchers.is(version.getDate())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.status", CoreMatchers.is(version.getStatus())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.message", CoreMatchers.is(version.getMessage())))
+                .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test public void VersionController_GetVersionReturnVersionNotFound() throws Exception {
+        when(userService.count()).thenReturn(10L);
+
+        ResultActions response = mockMvc.perform(get("/api/v1/version/5")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string(CoreMatchers.equalTo("")))
+                .andDo(MockMvcResultHandlers.print());
+
+        response = mockMvc.perform(get("/api/v2/version")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound())
+                .andExpect(MockMvcResultMatchers.content().string(CoreMatchers.equalTo("")))
+                .andDo(MockMvcResultHandlers.print());
+
+        response = mockMvc.perform(post("/api/v1/version")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isMethodNotAllowed())
+                .andExpect(MockMvcResultMatchers.content().string(CoreMatchers.equalTo("")))
                 .andDo(MockMvcResultHandlers.print());
     }
 }

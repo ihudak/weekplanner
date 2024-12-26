@@ -28,6 +28,7 @@ public class VersionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = Version.class), mediaType = "application/json") }),
             @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "405", description = "Not Allowed", content = { @Content(schema = @Schema()) }),
             @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
     })
     @GetMapping("")

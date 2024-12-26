@@ -39,6 +39,9 @@ public class CategoryDirector {
     }
 
     public List<Category> constructRandomCategories(int numCategories) {
+        if (numCategories < 0) {
+            numCategories = 0;
+        }
         var categories = new ArrayList<Category>(numCategories);
 
         for(int i = 0; i < numCategories; i++) {

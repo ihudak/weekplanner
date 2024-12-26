@@ -28,11 +28,12 @@ public class VersionController {
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = Version.class), mediaType = "application/json") }),
             @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "405", description = "Not Allowed", content = { @Content(schema = @Schema()) }),
             @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
     })
     @GetMapping("")
     @Operation(summary = "Get version, release date and number of records in the DB")
     public Version getVersion() {
-        return new Version("tasks", svcVer, svcDate, "OK", "Count: " + 0);
+        return new Version("tasks", svcVer, svcDate, "OK", "Count: " + taskService.count());
     }
 }
