@@ -40,7 +40,7 @@ public class TaskBuilder {
     }
 
     public TaskBuilder withCronExpression(String cronExpression) {
-        this.task.setCronSchedule(cronExpression);
+        this.task.setCronExpression(cronExpression);
         return this;
     }
 

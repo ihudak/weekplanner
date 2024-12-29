@@ -25,7 +25,7 @@ public class TaskDirector {
                 .withDescription(getRandStr(getRantTitleLength()))
                 .withPriority(faker.random().nextInt(-30, 30))
                 .withTaskState(TaskStates.READY)
-                .withCronExpression(faker.regexify("[0-9]{3}"))
+                .withCronExpression("0 0 0 ? * MON#1")
                 .withTaskLink("Jira", "https://jira.com");
     }
 

@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   buildDate = environment.dateGUI;
   tenantId = environment.selectedTenant;
 
-  displayedColumns: string[] = ['taskId', 'categoryId', 'title', 'description', 'state', 'cronSchedule', 'addedPriority', 'action'];
+  displayedColumns: string[] = ['taskId', 'categoryId', 'title', 'description', 'state', 'cronExpression', 'addedPriority', 'action'];
   dataSource!: MatTableDataSource<any>;
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
