@@ -1,8 +1,10 @@
 package eu.dec21.wp.tasks.collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.*;
+import org.springframework.data.annotation.Transient;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -15,9 +17,17 @@ import java.net.URL;
 @Setter
 @NoArgsConstructor
 public class TaskLink {
+    @Transient
+    @JsonIgnore
     final int minNameLength = 2;
+    @Transient
+    @JsonIgnore
     final int maxNameLength = 25;
+    @Transient
+    @JsonIgnore
     final int minUrlLength = 12;
+    @Transient
+    @JsonIgnore
     final int maxUrlLength = 255;
 
     @NonNull

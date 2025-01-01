@@ -208,6 +208,7 @@ public class TaskTest {
         task.setBlockingIssues(null);
         assertNull(task.getBlockingIssues());
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         TaskLink link1 = new TaskLink("text1", "https://example1.com");
         TaskLink link2 = new TaskLink("text2", "https://example2.com");
@@ -218,6 +219,7 @@ public class TaskTest {
         task.setBlockingIssues(links);
         assertEquals(links, task.getBlockingIssues());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         TaskLink link3 = new TaskLink("text3", "https://example3.com");
         task.addBlockLink(link3);
@@ -237,6 +239,7 @@ public class TaskTest {
         assertEquals(link1, task.getBlockingIssues().get(0));
         assertEquals(link3, task.getBlockingIssues().get(1));
         assertEquals(Boolean.TRUE, task.getIsBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         assertThrows(NullPointerException.class, () -> task.removeBlockLink(null));
         assertThrows(NullPointerException.class, () -> task.addBlockLink(null));
@@ -246,6 +249,7 @@ public class TaskTest {
         assertNull(task.getBlockingIssues());
         assertEquals(Boolean.TRUE, task.getIsBlocked());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
     }
 
     @Test
@@ -253,15 +257,42 @@ public class TaskTest {
         Task task = new Task();
         assertEquals(Boolean.FALSE, task.isBlocked());
         assertEquals(Boolean.FALSE, task.getIsBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
         task.setIsBlocked(true);
         assertEquals(Boolean.TRUE, task.isBlocked());
         assertEquals(Boolean.TRUE, task.getIsBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
         task.unblock();
         assertEquals(Boolean.FALSE, task.isBlocked());
         assertEquals(Boolean.FALSE, task.getIsBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
         task.block();
         assertEquals(Boolean.TRUE, task.isBlocked());
         assertEquals(Boolean.TRUE, task.getIsBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
+    }
+
+    @Test
+    void setIsActive() {
+        Task task = new Task();
+        assertEquals(Boolean.TRUE, task.isActive());
+        assertEquals(Boolean.TRUE, task.getIsActive());
+
+        task.deactivate();
+        assertEquals(Boolean.FALSE, task.isActive());
+        assertEquals(Boolean.FALSE, task.getIsActive());
+
+        task.activate();
+        assertEquals(Boolean.TRUE, task.isActive());
+        assertEquals(Boolean.TRUE, task.getIsActive());
+
+        task.setIsActive(false);
+        assertEquals(Boolean.FALSE, task.isActive());
+        assertEquals(Boolean.FALSE, task.getIsActive());
+
+        task.setIsActive(true);
+        assertEquals(Boolean.TRUE, task.isActive());
+        assertEquals(Boolean.TRUE, task.getIsActive());
     }
 
     @Test
@@ -274,6 +305,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.nextState();
         assertEquals(TaskStates.READY, task.getState());
@@ -281,6 +313,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.nextState();
         assertEquals(TaskStates.IMPL, task.getState());
@@ -288,6 +321,7 @@ public class TaskTest {
         assertEquals(Boolean.TRUE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());;
 
         task.nextState();
         assertEquals(TaskStates.DONE, task.getState());
@@ -295,6 +329,7 @@ public class TaskTest {
         assertEquals(Boolean.TRUE, task.getState().isStarted());
         assertEquals(Boolean.TRUE, task.getState().isDone());
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.nextState();
         assertEquals(TaskStates.DONE, task.getState());
@@ -304,6 +339,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.isBlocked());
         task.block(); // should not block completed task
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.cancel();
         assertEquals(TaskStates.CANCEL, task.getState());
@@ -313,6 +349,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.isBlocked());
         task.block(); // should not block completed task
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.nextState();
         assertEquals(TaskStates.CANCEL, task.getState());
@@ -320,6 +357,7 @@ public class TaskTest {
         assertEquals(Boolean.TRUE, task.getState().isStarted());
         assertEquals(Boolean.TRUE, task.getState().isDone());
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.complete();
         assertEquals(TaskStates.DONE, task.getState());
@@ -327,6 +365,7 @@ public class TaskTest {
         assertEquals(Boolean.TRUE, task.getState().isStarted());
         assertEquals(Boolean.TRUE, task.getState().isDone());
         assertEquals(Boolean.FALSE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.reopen();
         assertEquals(TaskStates.READY, task.getState());
@@ -336,6 +375,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.isBlocked());
         task.block();
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.prevState();
         assertEquals(TaskStates.PREP, task.getState());
@@ -343,6 +383,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.prevState();
         assertEquals(TaskStates.PREP, task.getState());
@@ -350,6 +391,7 @@ public class TaskTest {
         assertEquals(Boolean.FALSE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
 
         task.start();
         assertEquals(TaskStates.IMPL, task.getState());
@@ -357,5 +399,6 @@ public class TaskTest {
         assertEquals(Boolean.TRUE, task.getState().isStarted());
         assertEquals(Boolean.FALSE, task.getState().isDone());
         assertEquals(Boolean.TRUE, task.isBlocked());
+        assertEquals(Boolean.TRUE, task.isActive());
     }
 }

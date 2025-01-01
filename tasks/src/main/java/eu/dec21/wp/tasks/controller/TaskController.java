@@ -26,11 +26,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/tasks")
 public class TaskController {
+    private final TaskService taskService;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    private TaskService taskService;
-    @Autowired
-    private CategoryRepository categoryRepository;
+    public TaskController(TaskService taskService, CategoryRepository categoryRepository) {
+        this.taskService = taskService;
+        this.categoryRepository = categoryRepository;
+    }
 
     @ApiResponses({
             @ApiResponse(responseCode = "200", description = "Updated", content = { @Content(schema = @Schema(implementation = Task.class), mediaType = "application/json") }),
@@ -59,7 +62,7 @@ public class TaskController {
         }
         // check if the category exists
         this.verifyCategory(task.getCategoryId());
-        if (null == task.getTaskId() || !id.equals(task.getTaskId())) {
+        if (!id.equals(task.getTaskId())) {
             task.setTaskId(id);
         }
         return new ResponseEntity<>(taskService.save(task), HttpStatus.OK);
@@ -73,7 +76,11 @@ public class TaskController {
     @GetMapping("{id}")
     @Operation(summary = "Get Task by ID")
     public ResponseEntity<Task> getTaskByID(@PathVariable String id) {
-        return ResponseEntity.ok(taskService.getTaskById(id));
+        Task storedTask = taskService.getTaskById(id);
+        if (storedTask == null || !id.equals(storedTask.getTaskId())) {
+            throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
+        }
+        return ResponseEntity.ok(storedTask);
     }
 
     @ApiResponses({
@@ -147,6 +154,9 @@ public class TaskController {
     @DeleteMapping("{id}")
     @Operation(summary = "Delete Task by ID")
     public ResponseEntity<TaskIdResponse> delete(@PathVariable String id) {
+        if (taskService.getTaskById(id) == null) {
+            return ResponseEntity.notFound().build();
+        }
         taskService.delete(id);
         return ResponseEntity.ok(new TaskIdResponse(id));
     }

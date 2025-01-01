@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface TaskService {
     Task save(Task task);
+    List<Task> saveAll(List<Task> tasks);
     Task getTaskById(String id);
     TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize);
     List<Task> getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state);

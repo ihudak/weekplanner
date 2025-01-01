@@ -22,14 +22,23 @@ import java.util.List;
 @Service
 public class TaskServiceImpl implements TaskService {
 
+    private final TaskRepository taskRepository;
+    private final MongoTemplate mongoTemplate;
+
     @Autowired
-    private TaskRepository taskRepository;
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    public TaskServiceImpl(MongoTemplate mongoTemplate, TaskRepository taskRepository) {
+        this.mongoTemplate = mongoTemplate;
+        this.taskRepository = taskRepository;
+    }
 
     @Override
     public Task save(Task task) {
         return taskRepository.save(task);
+    }
+
+    @Override
+    public List<Task> saveAll(List<Task> tasks) {
+        return taskRepository.saveAll(tasks);
     }
 
     @Override

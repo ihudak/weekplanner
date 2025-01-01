@@ -1,5 +1,6 @@
 package eu.dec21.wp.tasks.collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Max;
@@ -8,6 +9,8 @@ import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.scheduling.support.CronExpression;
 
@@ -22,10 +25,20 @@ import java.util.List;
 @Document(collection = "tasks")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Task {
+    @Transient
+    @JsonIgnore
     final int minTitleLength = 2;
+    @Transient
+    @JsonIgnore
     final int maxTitleLength = 127;
+    @Transient
+    @JsonIgnore
     final int maxDescriptionLength = 255;
+    @Transient
+    @JsonIgnore
     final int minAddedPriority = -30;
+    @Transient
+    @JsonIgnore
     final int maxAddedPriority = 30;
 
     @Id
@@ -34,17 +47,21 @@ public class Task {
     @NonNull
     @Schema(name="categoryId", example = "45", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the task category (or project)")
     @Min(1)
+    @Indexed
     private Long categoryId;
     @NonNull
     @Schema(name="title", example = "Implement Auth for the task registry", requiredMode = Schema.RequiredMode.REQUIRED, description = "The title of the task")
     @Size(min = minTitleLength, max = maxTitleLength)
+    @Indexed
     private String title;
     @Null
     @Schema(name="description", example = "Implement FaceBook and Google SSO", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "The description of the task")
     @Size(max = maxDescriptionLength)
+    @Indexed
     private String description;
     @NonNull
     @Schema(name="state", example = "DONE", requiredMode = Schema.RequiredMode.REQUIRED, description = "The state of the task")
+    @Indexed
     private TaskStates state = TaskStates.PREP;
     @NonNull
     @Schema(name="cronExpression", example = "0 0 * * 1", requiredMode = Schema.RequiredMode.REQUIRED, description = "The schedule of the task")
@@ -60,14 +77,19 @@ public class Task {
     private List<TaskLink> taskLinks;
     @NonNull
     @Schema(name="isBlocked", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is blocked")
+    @Indexed
     private Boolean isBlocked = Boolean.FALSE;
     @Null
     @Schema(name="blockReason", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Verbal reason why the task is blocked")
     @Size(max = maxDescriptionLength)
     private String blockReason;
     @Null
-    @Schema(name="blockLinks", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "The links to the blocking issues")
+    @Schema(name="blockingIssues", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "The links to the blocking issues")
     private List<TaskLink> blockingIssues;
+    @NonNull
+    @Schema(name="isActive", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is active to create recurring copies")
+    @Indexed
+    private Boolean isActive = Boolean.TRUE;
 
     public void setCategoryId(@NonNull Long categoryId) {
         if (categoryId < 1) {
@@ -207,5 +229,17 @@ public class Task {
 
     public void unblock() {
         this.isBlocked = Boolean.FALSE;
+    }
+
+    public void activate() {
+        this.isActive = Boolean.TRUE;
+    }
+
+    public void deactivate() {
+        this.isActive = Boolean.FALSE;
+    }
+
+    public Boolean isActive() {
+        return this.isActive;
     }
 }

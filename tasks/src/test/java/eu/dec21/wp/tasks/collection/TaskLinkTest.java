@@ -3,9 +3,6 @@ package eu.dec21.wp.tasks.collection;
 import com.github.javafaker.Faker;
 import org.junit.jupiter.api.Test;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class TaskLinkTest {

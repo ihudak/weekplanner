@@ -4,7 +4,6 @@ import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.model.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
@@ -14,8 +13,7 @@ import org.springframework.web.client.RestTemplate;
 public class CategoryRepository {
     @Value("${http.service.categories}")
     private String categoryBaseURL;
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     private final Logger logger = LoggerFactory.getLogger(CategoryRepository.class);
 
     public CategoryRepository() {

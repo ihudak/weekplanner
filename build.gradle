@@ -87,7 +87,7 @@ project("tasks") {
         implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
         implementation project(':common')
         implementation project(':exceptions')
-        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.18.1'
+        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.18.0'
     }
     dynatrace {
         agentDownload {
