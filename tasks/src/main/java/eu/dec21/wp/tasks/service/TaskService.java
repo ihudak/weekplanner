@@ -11,7 +11,7 @@ public interface TaskService {
     List<Task> saveAll(List<Task> tasks);
     Task getTaskById(String id);
     TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize);
-    List<Task> getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state);
+    TaskResponse getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state, int pageNo, int pageSize);
 
     TaskResponse findAll(int pageNo, int pageSize);
     TaskResponse searchTasks(String searchString, int pageNo, int pageSize);

@@ -20,8 +20,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @Tag(name="WeekPlanner-Tasks", description = "Tasks Management API")
 @RestController
 @RequestMapping("/api/v1/tasks")
@@ -122,13 +120,15 @@ public class TaskController {
     })
     @GetMapping("findByCategoryAndState")
     @Operation(summary = "Get all Tasks")
-    public List<Task> getTasksByCategoryAndState(
+    public TaskResponse getTasksByCategoryAndState(
             @Parameter(name="categoryId", description = "Category ID", example = "45") @RequestParam("categoryId") Long categoryId,
-            @Parameter(name="state", description = "Task State", example = "DONE") @RequestParam("state") TaskStates state
+            @Parameter(name="state", description = "Task State", example = "DONE") @RequestParam("state") TaskStates state,
+            @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
         // check if the category exists
         this.verifyCategory(categoryId);
-        return taskService.getAllTasksByCategoryIdAndState(categoryId, state);
+        return taskService.getAllTasksByCategoryIdAndState(categoryId, state, pageNo, pageSize);
     }
 
     @ApiResponses({

@@ -7,10 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
 @Repository
 public interface TaskRepository extends MongoRepository<Task, String> {
     Page<Task> getAllByCategoryId(Long categoryId, Pageable pageable);
-    List<Task> getAllByCategoryIdAndState(Long categoryId, TaskStates state);
+    Page<Task> getAllByCategoryIdAndState(Long categoryId, TaskStates state, Pageable pageable);
 }

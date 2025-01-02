@@ -63,8 +63,14 @@ public class TaskRepositoryTest {
         tasks = taskRepository.getAllByCategoryId(task.getCategoryId(), pageable).getContent();
         assertEquals(0, tasks.size());
 
-        tasks = taskRepository.getAllByCategoryIdAndState(task.getCategoryId(), task.getState());
-        assertNotNull(tasks.getFirst());
+        pageable = PageRequest.of(0, 10);
+        tasks = taskRepository.getAllByCategoryIdAndState(task.getCategoryId(), task.getState(), pageable).getContent();
+        assertEquals(task.getTaskId(), tasks.getFirst().getTaskId());
+        assertEquals(1, tasks.size());
+
+        pageable = PageRequest.of(1, 10);
+        tasks = taskRepository.getAllByCategoryIdAndState(task.getCategoryId(), task.getState(), pageable).getContent();
+        assertEquals(0, tasks.size());
     }
 
     @Test

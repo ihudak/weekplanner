@@ -43,13 +43,12 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize) {
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
-        return getTaskResponse(taskRepository.getAllByCategoryId(categoryId, pageable));
+        return getTaskResponse(taskRepository.getAllByCategoryId(categoryId, PageRequest.of(pageNo, pageSize)));
     }
 
     @Override
-    public List<Task> getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state) {
-        return taskRepository.getAllByCategoryIdAndState(categoryId, state);
+    public TaskResponse getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state, int pageNo, int pageSize) {
+        return getTaskResponse(taskRepository.getAllByCategoryIdAndState(categoryId, state, PageRequest.of(pageNo, pageSize)));
     }
 
     @Override

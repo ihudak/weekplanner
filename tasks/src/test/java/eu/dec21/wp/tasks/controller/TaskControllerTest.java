@@ -293,10 +293,15 @@ public class TaskControllerTest {
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[0].taskId").value(tasks.get(1).getTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[1].taskId").value(tasks.get(2).getTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[2].taskId").value(tasks.get(3).getTaskId()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.[3].taskId").doesNotExist())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pageNo").value(0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pageSize").value(3))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(3))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.last").value(true))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].taskId").value(tasks.get(1).getTaskId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].taskId").value(tasks.get(2).getTaskId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[2].taskId").value(tasks.get(3).getTaskId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[3].taskId").doesNotExist())
                 .andDo(MockMvcResultHandlers.print());
     }
 
@@ -428,12 +433,12 @@ public class TaskControllerTest {
                     tasks.add(task);
                 }
             }
-            return tasks;
+            return tasksArgument;
         });
 
         when(taskService.getTaskById(anyString())).then((Answer<Task>) invocation -> {
             String taskId = (String) invocation.getArgument(0, String.class);
-            return tasks.stream().filter(a -> a.getTaskId().equals(taskId)).findFirst().orElse(null);
+            return tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
         });
 
         when(taskService.getAllTasksByCategoryId(anyLong(), any(Integer.class), any(Integer.class))).then((Answer<TaskResponse>) invocation -> {
@@ -445,12 +450,14 @@ public class TaskControllerTest {
             return new TaskResponse(taskList, pageNo, min(pageSize, taskList.size()), taskList.size(), 1, true);
         });
 
-        when(taskService.getAllTasksByCategoryIdAndState(anyLong(), any(TaskStates.class))).then((Answer<List<Task>>) invocation -> {
+        when(taskService.getAllTasksByCategoryIdAndState(anyLong(), any(TaskStates.class), any(Integer.class), any(Integer.class))).then((Answer<TaskResponse>) invocation -> {
             Long categoryId = (Long) invocation.getArgument(0, Long.class);
             TaskStates taskStates = (TaskStates) invocation.getArgument(1, TaskStates.class);
-            List<Task> taskList = tasks.stream().filter(a -> a.getCategoryId().equals(categoryId)).toList();
-            taskList = taskList.stream().filter(a -> a.getState().equals(taskStates)).toList();
-            return taskList;
+            Integer pageNo = (Integer) invocation.getArgument(2, Integer.class);
+            Integer pageSize = (Integer) invocation.getArgument(3, Integer.class);
+            List<Task> taskList = tasks.stream().filter(t -> t.getCategoryId().equals(categoryId)).toList();
+            taskList = taskList.stream().filter(t -> t.getState().equals(taskStates)).toList();
+            return new TaskResponse(taskList, pageNo, min(pageSize, taskList.size()), taskList.size(), 1, true);
         });
 
         when(taskService.findAll(anyInt(), anyInt())).then((Answer<TaskResponse>) invocation -> {
@@ -469,7 +476,7 @@ public class TaskControllerTest {
             return new TaskResponse(taskList, pageNo, min(pageSize, taskList.size()), taskList.size(), 1, true);
         });
 
-        doAnswer(invocation -> {
+        doAnswer((Answer<String>) invocation -> {
             String taskId = (String) invocation.getArgument(0, String.class);
             if (tasks.isEmpty()) {
                 return "";
