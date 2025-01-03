@@ -19,15 +19,23 @@ import java.net.URL;
 public class TaskLink {
     @Transient
     @JsonIgnore
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     final int minNameLength = 2;
     @Transient
     @JsonIgnore
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     final int maxNameLength = 25;
     @Transient
     @JsonIgnore
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     final int minUrlLength = 12;
     @Transient
     @JsonIgnore
+    @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     final int maxUrlLength = 255;
 
     @NonNull

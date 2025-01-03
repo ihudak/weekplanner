@@ -1,6 +1,7 @@
 package eu.dec21.wp.tasks.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.tasks.collection.*;
 import eu.dec21.wp.tasks.repository.CategoryRepository;
 import eu.dec21.wp.tasks.service.TaskService;
@@ -201,8 +202,7 @@ public class TaskControllerTest {
 
     @Test
     void getAllTasks() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
+        List<Task> taskList = taskDirector.constructRandomTasks(5);
         tasks.addAll(taskList);
 
         ResultActions response = mockMvc.perform(get("/api/v1/tasks?pageNo=0&pageSize=10")
@@ -211,7 +211,7 @@ public class TaskControllerTest {
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.pageNo").value(0))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.pageSize").value(5))
-                .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(numTasks))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(5))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages").value(1))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.last").value(true))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].taskId").value(tasks.get(0).getTaskId()))
@@ -227,8 +227,7 @@ public class TaskControllerTest {
 
     @Test
     void getTasksByCategory() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
+        List<Task> taskList = taskDirector.constructRandomTasks(5);
         for (Task task : taskList) {
             task.setCategoryId(5L);
         }
@@ -255,8 +254,7 @@ public class TaskControllerTest {
 
     @Test
     void getTasksByNonExistingCategory() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
+        List<Task> taskList = taskDirector.constructRandomTasks(5);
         for (Task task : taskList) {
             task.setCategoryId(3L);
         }
@@ -278,8 +276,7 @@ public class TaskControllerTest {
 
     @Test
     void getTasksByCategoryAndState() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
+        List<Task> taskList = taskDirector.constructRandomTasks(5);
         for (Task task : taskList) {
             task.setCategoryId(5L);
             task.setState(TaskStates.IMPL);
@@ -307,8 +304,7 @@ public class TaskControllerTest {
 
     @Test
     void getTasksByNonExistingCategoryAndState() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
+        List<Task> taskList = taskDirector.constructRandomTasks(5);
         for (Task task : taskList) {
             task.setCategoryId(5L);
             task.setState(TaskStates.IMPL);
@@ -331,14 +327,12 @@ public class TaskControllerTest {
 
     @Test
     void searchTasks() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
-        for (Task task : taskList) {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        for (Task task : tasks) {
             task.setTitle("my project in Java");
         }
-        taskList.get(0).setTitle("boo");
-        taskList.get(4).setTitle("foo");
-        tasks.addAll(taskList);
+        tasks.get(0).setTitle("boo");
+        tasks.get(4).setTitle("foo");
 
         ResultActions response = mockMvc.perform(get("/api/v1/tasks/search?searchString=project&pageNo=0&pageSize=10")
                 .contentType(MediaType.APPLICATION_JSON));
@@ -358,12 +352,10 @@ public class TaskControllerTest {
 
     @Test
     void searchTasksByNonExistingPattern() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
-        for (Task task : taskList) {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        for (Task task : tasks) {
             task.setTitle("my issues in Java");
         }
-        tasks.addAll(taskList);
 
         ResultActions response = mockMvc.perform(get("/api/v1/tasks/search?searchString=project&pageNo=0&pageSize=10")
                 .contentType(MediaType.APPLICATION_JSON));
@@ -380,10 +372,8 @@ public class TaskControllerTest {
 
     @Test
     void deleteTask() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
-        tasks.addAll(taskList);
-        String taskId = taskList.getFirst().getTaskId();
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        String taskId = tasks.getFirst().getTaskId();
 
         ResultActions response = mockMvc.perform(delete("/api/v1/tasks/" + taskId)
             .contentType(MediaType.APPLICATION_JSON));
@@ -391,16 +381,14 @@ public class TaskControllerTest {
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.taskId").value(taskId)).andDo(MockMvcResultHandlers.print());
 
-        assertEquals(numTasks - 1, tasks.size());
+        assertEquals(4, tasks.size());
         Task deletedTask = tasks.stream().filter(a -> a.getTaskId().equals(taskId)).findFirst().orElse(null);
         assertNull(deletedTask);
     }
 
     @Test
     void deleteNonExistingTask() throws Exception {
-        int numTasks = 5;
-        List<Task> taskList = taskDirector.constructRandomTasks(numTasks);
-        tasks.addAll(taskList);
+        tasks.addAll(taskDirector.constructRandomTasks(5));
         String taskId = "non-existing-task";
 
         ResultActions response = mockMvc.perform(delete("/api/v1/tasks/" + taskId)
@@ -408,7 +396,7 @@ public class TaskControllerTest {
 
         response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
 
-        assertEquals(numTasks, tasks.size());
+        assertEquals(5, tasks.size());
         Task deletedTask = tasks.stream().filter(a -> a.getTaskId().equals(taskId)).findFirst().orElse(null);
         assertNull(deletedTask);
     }
@@ -438,7 +426,7 @@ public class TaskControllerTest {
 
         when(taskService.getTaskById(anyString())).then((Answer<Task>) invocation -> {
             String taskId = (String) invocation.getArgument(0, String.class);
-            return tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
+            return tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + taskId));
         });
 
         when(taskService.getAllTasksByCategoryId(anyLong(), any(Integer.class), any(Integer.class))).then((Answer<TaskResponse>) invocation -> {
@@ -478,8 +466,8 @@ public class TaskControllerTest {
 
         doAnswer((Answer<String>) invocation -> {
             String taskId = (String) invocation.getArgument(0, String.class);
-            if (tasks.isEmpty()) {
-                return "";
+            if (tasks.isEmpty() || tasks.stream().noneMatch(t -> t.getTaskId().equals(taskId))) {
+                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
             }
             tasks.removeIf(task -> task.getTaskId().equals(taskId));
             return taskId;

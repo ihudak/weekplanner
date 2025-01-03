@@ -1,9 +1,7 @@
 package eu.dec21.wp.tasks.service;
 
-import eu.dec21.wp.tasks.collection.Task;
-import eu.dec21.wp.tasks.collection.TaskDirector;
-import eu.dec21.wp.tasks.collection.TaskResponse;
-import eu.dec21.wp.tasks.collection.TaskStates;
+import eu.dec21.wp.exceptions.ResourceNotFoundException;
+import eu.dec21.wp.tasks.collection.*;
 import eu.dec21.wp.tasks.repository.TaskRepository;
 import eu.dec21.wp.tasks.service.impl.TaskServiceImpl;
 import org.junit.jupiter.api.AfterEach;
@@ -20,13 +18,15 @@ import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.lenient;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +34,8 @@ public class TaskServiceTest {
 
     @Mock
     private TaskRepository taskRepository;
+    @Mock
+    private MongoTemplate mongoTemplate;
 
     @InjectMocks
     private TaskServiceImpl taskService;
@@ -171,6 +173,70 @@ public class TaskServiceTest {
         }
     }
 
+    @Test
+    void findAll() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        TaskResponse response = taskService.findAll(0, 5);
+        assertEquals(5, response.getContent().size());
+        for (Task task : response.getContent()) {
+            assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals(task.getTaskId())).findFirst().orElse(null));
+        }
+    }
+
+    @Test
+    void searchTasks() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        for (Task task : tasks) {
+            task.setTitle("my project in dec");
+        }
+        tasks.get(1).setTitle("boo");
+        tasks.get(3).setTitle("foo");
+
+        TaskResponse response = taskService.searchTasks("project", 0, 5);
+        assertEquals(3, response.getContent().size());
+        assertEquals(3, response.getTotalElements());
+        assertEquals(0, response.getTotalPages());
+        assertEquals(5, response.getPageSize());
+        assertTrue(response.isLast());
+        for (Task task : response.getContent()) {
+            assertEquals("my project in dec", task.getTitle());
+        }
+    }
+
+    @Test
+    void getTaskById() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        Task task = taskService.getTaskById("3");
+        assertEquals("3", task.getTaskId());
+    }
+
+    @Test
+    void getNonExistingTask() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        assertThrowsExactly(ResourceNotFoundException.class, () -> taskService.getTaskById("non-existing"));
+    }
+
+    @Test
+    void deleteTask() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        assertEquals(5, tasks.size());
+        taskService.delete("3");
+        assertEquals(4, tasks.size());
+        assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals("0")).findFirst().orElse(null));
+        assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals("1")).findFirst().orElse(null));
+        assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals("2")).findFirst().orElse(null));
+        assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals("4")).findFirst().orElse(null));
+        assertNull(tasks.stream().filter(t -> t.getTaskId().equals("3")).findFirst().orElse(null));
+    }
+
+    @Test
+    void deleteNonExistingTask() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        assertEquals(5, tasks.size());
+        assertThrowsExactly(ResourceNotFoundException.class, () -> taskService.delete("non existing task"));
+        assertEquals(5, tasks.size());
+    }
+
     // ToDo: implement rest of the tests
 
     private void setupMocks() {
@@ -182,6 +248,13 @@ public class TaskServiceTest {
             String taskId = (String) invocation.getArgument(0, String.class);
             Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
             return task == null ? Optional.empty() : Optional.of(task);
+        });
+
+        // exists by id
+        lenient().when(taskRepository.existsById(Mockito.anyString())).then((Answer<Boolean>) invocation -> {
+            String taskId = (String) invocation.getArgument(0, String.class);
+            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
+            return task != null;
         });
 
         // getAllByCategory
@@ -258,5 +331,45 @@ public class TaskServiceTest {
             tasks.removeIf(task -> taskToDel.getTaskId().equals(task.getTaskId()));
             return taskToDel;
         }).when(taskRepository).delete(Mockito.any(Task.class));
+
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> {
+            Query query = (Query) invocation.getArgument(0, Query.class);
+            String search = "project";
+            return this.findTasks(search);
+        });
+
+        lenient().when(mongoTemplate.count(Mockito.any(Query.class), Mockito.any(Class.class))).thenAnswer((Answer<Integer>) invocation -> {
+            Query query = (Query) invocation.getArgument(0, Query.class);
+            String search = "project";
+            return this.findTasks(search).size();
+        });
+    }
+
+    private List<Task> findTasks(String search) {
+        List<Task> taskList = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.getTitle().contains(search) ||
+                    null != task.getDescription() && task.getDescription().contains(search) ||
+                    task.getState().toString().contains(search) ||
+                    null != task.getBlockReason() && task.getBlockReason().contains(search)) {
+                taskList.add(task);
+            }
+            if (task.getTaskLinks() != null && !task.getTaskLinks().isEmpty()) {
+                for (TaskLink taskLink : task.getTaskLinks()) {
+                    if (taskLink.getUrl().contains(search) || taskLink.getName().contains(search)) {
+                        taskList.add(task);
+                    }
+                }
+            }
+            if (task.getBlockingIssues() != null && !task.getBlockingIssues().isEmpty()) {
+                for (TaskLink taskLink : task.getBlockingIssues()) {
+                    if (taskLink.getUrl().contains(search) || taskLink.getName().contains(search)) {
+                        taskList.add(task);
+                    }
+                }
+            }
+        }
+        return taskList.stream().distinct().collect(Collectors.toList());
     }
 }

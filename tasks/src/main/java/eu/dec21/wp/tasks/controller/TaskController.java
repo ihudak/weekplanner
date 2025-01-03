@@ -54,15 +54,9 @@ public class TaskController {
     @PutMapping("{id}")
     @Operation(summary = "Update a Task")
     public ResponseEntity<Task> update(@PathVariable("id") String id, @RequestBody Task task) {
-        Task storedTask = taskService.getTaskById(id);
-        if (storedTask == null || !id.equals(storedTask.getTaskId())) {
-            throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
-        }
+        Task ignore = taskService.getTaskById(id); // check if the task exist
         // check if the category exists
         this.verifyCategory(task.getCategoryId());
-        if (!id.equals(task.getTaskId())) {
-            task.setTaskId(id);
-        }
         return new ResponseEntity<>(taskService.save(task), HttpStatus.OK);
     }
 
@@ -74,11 +68,7 @@ public class TaskController {
     @GetMapping("{id}")
     @Operation(summary = "Get Task by ID")
     public ResponseEntity<Task> getTaskByID(@PathVariable String id) {
-        Task storedTask = taskService.getTaskById(id);
-        if (storedTask == null || !id.equals(storedTask.getTaskId())) {
-            throw new ResourceNotFoundException("Task is wrong or not found with ID: " + id);
-        }
-        return ResponseEntity.ok(storedTask);
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @ApiResponses({
@@ -154,9 +144,6 @@ public class TaskController {
     @DeleteMapping("{id}")
     @Operation(summary = "Delete Task by ID")
     public ResponseEntity<TaskIdResponse> delete(@PathVariable String id) {
-        if (taskService.getTaskById(id) == null) {
-            return ResponseEntity.notFound().build();
-        }
         taskService.delete(id);
         return ResponseEntity.ok(new TaskIdResponse(id));
     }

@@ -70,15 +70,20 @@ public class TaskServiceImpl implements TaskService {
         criteria.add(Criteria.where("title").regex(searchString, "i"));
         criteria.add(Criteria.where("description").regex(searchString, "i"));
         criteria.add(Criteria.where("state").regex(searchString, "i"));
-        criteria.add(Criteria.where("taskLinks.name").regex(searchString, "i"));
-        criteria.add(Criteria.where("taskLinks.url").regex(searchString, "i"));
+        criteria.add(Criteria.where("blockReason").regex(searchString, "i"));
+
+        criteria.add(Criteria.where("taskLinks").elemMatch(Criteria.where("name").regex(searchString, "i")));
+        criteria.add(Criteria.where("taskLinks").elemMatch(Criteria.where("url").regex(searchString, "i")));
+        criteria.add(Criteria.where("blockingIssues").elemMatch(Criteria.where("name").regex(searchString, "i")));
+        criteria.add(Criteria.where("blockingIssues").elemMatch(Criteria.where("url").regex(searchString, "i")));
 
         query.addCriteria(new Criteria().orOperator(criteria));
+        query.skip((long) pageNo * pageSize).limit(pageSize);
 
         return getTaskResponse(
                 PageableExecutionUtils.getPage(
                         mongoTemplate.find(query, Task.class),
-                        pageable, () -> mongoTemplate.count(query.skip(0).limit(0), Task.class)
+                        pageable, () -> mongoTemplate.count(query, Task.class)
                 )
         );
     }
@@ -91,6 +96,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void delete(String id) {
+        if (!taskRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Task does not exist with the given ID: " + id);
+        }
         taskRepository.deleteById(id);
     }
 
