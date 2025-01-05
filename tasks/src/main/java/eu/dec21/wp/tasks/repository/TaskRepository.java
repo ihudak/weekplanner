@@ -9,6 +9,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TaskRepository extends MongoRepository<Task, String> {
-    Page<Task> getAllByCategoryId(Long categoryId, Pageable pageable);
-    Page<Task> getAllByCategoryIdAndState(Long categoryId, TaskStates state, Pageable pageable);
+    Page<Task> getAllByCategoryIdAndArchived(Long categoryId, Boolean archived, Pageable pageable);
+    Page<Task> getAllByCategoryIdAndStateAndArchived(Long categoryId, TaskStates state, Boolean archived, Pageable pageable);
+    Page<Task> getAllByStateAndArchived(TaskStates state, Boolean archived, Pageable pageable);
+    Page<Task> getAllByArchived(Boolean archived, Pageable pageable);
 }

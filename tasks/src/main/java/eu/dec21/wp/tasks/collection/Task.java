@@ -14,6 +14,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.scheduling.support.CronExpression;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -90,6 +91,14 @@ public class Task {
     @Schema(name="isActive", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is active to create recurring copies")
     @Indexed
     private Boolean isActive = Boolean.TRUE;
+    @NonNull
+    @Schema(name="taskDateTime", requiredMode = Schema.RequiredMode.REQUIRED, description = "Timestamp when the task is scheduled for implementation")
+    @Indexed
+    private LocalDateTime taskDateTime = LocalDateTime.now();
+    @NonNull
+    @Schema(name="archived", requiredMode = Schema.RequiredMode.REQUIRED, description = "Indicates whether the task is archived")
+    @Indexed
+    private Boolean archived = Boolean.FALSE;
 
     public void setCategoryId(@NonNull Long categoryId) {
         if (categoryId < 1) {
@@ -241,5 +250,17 @@ public class Task {
 
     public Boolean isActive() {
         return this.isActive;
+    }
+
+    public Boolean isArchived() {
+        return this.archived;
+    }
+
+    public Boolean isActual() {
+        return !this.archived;
+    }
+
+    public void archive() {
+        this.archived = Boolean.TRUE;
     }
 }

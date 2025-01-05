@@ -184,6 +184,44 @@ public class TaskServiceTest {
     }
 
     @Test
+    void getActualTasks() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        tasks.get(2).archive();
+
+        TaskResponse response = taskService.getActualTasks(0, 5);
+        assertEquals(4, response.getContent().size());
+        for (Task task : response.getContent()) {
+            assertNotNull(tasks.stream().filter(t -> t.getTaskId().equals(task.getTaskId())).findFirst().orElse(null));
+            assertFalse(task.isArchived());
+        }
+    }
+
+    @Test
+    void getTasksByStateActual() {
+        tasks.addAll(taskDirector.constructTasksForCategoryState(2L, TaskStates.DONE, 2));
+        tasks.addAll(taskDirector.constructTasksForCategoryState(2L, TaskStates.IMPL, 1));
+        tasks.addAll(taskDirector.constructTasksForCategoryState(1L, TaskStates.IMPL, 2));
+        assertEquals(5, tasks.size());
+        tasks.get(1).archive();
+        tasks.get(3).archive();
+        tasks.get(4).archive();
+
+        TaskResponse response = taskService.getTasksByStateActual(TaskStates.DONE, 0, 10);
+        assertEquals(1, response.getContent().size());
+        for (Task task : response.getContent()) {
+            assertEquals(TaskStates.DONE, task.getState());
+            assertTrue(task.isActual());
+        }
+
+        response = taskService.getTasksByStateActual(TaskStates.IMPL, 0, 10);
+        assertEquals(1, response.getContent().size());
+        for (Task task : response.getContent()) {
+            assertTrue(task.isActual());
+            assertEquals(TaskStates.IMPL, task.getState());
+        }
+    }
+
+    @Test
     void searchTasks() {
         tasks.addAll(taskDirector.constructRandomTasks(5));
         for (Task task : tasks) {
@@ -192,7 +230,7 @@ public class TaskServiceTest {
         tasks.get(1).setTitle("boo");
         tasks.get(3).setTitle("foo");
 
-        TaskResponse response = taskService.searchTasks("project", 0, 5);
+        TaskResponse response = taskService.searchTasks("project", false, 0, 5);
         assertEquals(3, response.getContent().size());
         assertEquals(3, response.getTotalElements());
         assertEquals(0, response.getTotalPages());
@@ -200,6 +238,28 @@ public class TaskServiceTest {
         assertTrue(response.isLast());
         for (Task task : response.getContent()) {
             assertEquals("my project in dec", task.getTitle());
+        }
+    }
+
+    @Test
+    void searchTasksInclArchived() {
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        for (Task task : tasks) {
+            task.setTitle("my project in dec");
+        }
+        tasks.get(1).setTitle("boo");
+        tasks.get(3).setTitle("foo");
+        tasks.get(2).archive();
+
+        TaskResponse response = taskService.searchTasks("project", true, 0, 5);
+        assertEquals(2, response.getContent().size());
+        assertEquals(2, response.getTotalElements());
+        assertEquals(0, response.getTotalPages());
+        assertEquals(5, response.getPageSize());
+        assertTrue(response.isLast());
+        for (Task task : response.getContent()) {
+            assertEquals("my project in dec", task.getTitle());
+            assertFalse(task.isArchived());
         }
     }
 
@@ -258,26 +318,54 @@ public class TaskServiceTest {
         });
 
         // getAllByCategory
-        lenient().when(taskRepository.getAllByCategoryId(Mockito.anyLong(), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
+        lenient().when(taskRepository.getAllByCategoryIdAndArchived(Mockito.anyLong(), Mockito.anyBoolean(), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
             Long categoryId = (Long) invocation.getArgument(0, Long.class);
-            Pageable pageable = (Pageable) invocation.getArgument(1, Pageable.class);
+            Boolean inclArchived = (Boolean) invocation.getArgument(1, Boolean.class);
+            Pageable pageable = (Pageable) invocation.getArgument(2, Pageable.class);
 
             List<Task> taskList = tasks.stream().filter(t -> categoryId.equals(t.getCategoryId())).toList();
+
+            if (!inclArchived) {
+                taskList = taskList.stream().filter(t -> Boolean.FALSE.equals(t.getArchived())).toList();
+            }
+
             return new PageImpl<>(taskList, pageable, taskList.size());
         });
 
         // get all by category and state
-        lenient().when(taskRepository.getAllByCategoryIdAndState(Mockito.anyLong(), Mockito.any(TaskStates.class), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
+        lenient().when(taskRepository.getAllByCategoryIdAndStateAndArchived(Mockito.anyLong(), Mockito.any(TaskStates.class), Mockito.anyBoolean(), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
             long categoryId = (long) invocation.getArgument(0, Long.class);
             TaskStates taskState = (TaskStates) invocation.getArgument(1, TaskStates.class);
-            Pageable pageable = (Pageable) invocation.getArgument(2, Pageable.class);
+            Boolean inclArchived = (Boolean) invocation.getArgument(2, Boolean.class);
+            Pageable pageable = (Pageable) invocation.getArgument(3, Pageable.class);
             List<Task> tasksToReturn = tasks.stream().filter(t -> t.getCategoryId().equals(categoryId)).toList();
             tasksToReturn = tasksToReturn.stream().filter(t -> t.getState().equals(taskState)).toList();
+            if (!inclArchived) {
+                tasksToReturn = tasksToReturn.stream().filter(t -> Boolean.FALSE.equals(t.getArchived())).toList();
+            }
+            return new PageImpl<>(tasksToReturn, pageable, tasksToReturn.size());
+        });
+
+        // get all by state and archived
+        lenient().when(taskRepository.getAllByStateAndArchived(Mockito.any(TaskStates.class), Mockito.anyBoolean(), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
+            TaskStates taskState = (TaskStates) invocation.getArgument(0, TaskStates.class);
+            Boolean archived = (Boolean) invocation.getArgument(1, Boolean.class);
+            Pageable pageable = (Pageable) invocation.getArgument(2, Pageable.class);
+
+            List<Task> tasksToReturn = tasks.stream().filter(t -> archived.equals(t.getArchived())).toList();
+            tasksToReturn = tasksToReturn.stream().filter(t -> taskState.equals(t.getState())).toList();
             return new PageImpl<>(tasksToReturn, pageable, tasksToReturn.size());
         });
 
         // find all
         lenient().when(taskRepository.findAll()).then((Answer<List<Task>>) invocation -> tasks);
+
+        // find all not archived
+        lenient().when(taskRepository.getAllByArchived(Mockito.anyBoolean(), Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
+            Boolean archived = (Boolean) invocation.getArgument(0, Boolean.class);
+            Pageable pageable = (Pageable) invocation.getArgument(1, Pageable.class);
+            return new PageImpl<>(tasks.stream().filter(t -> t.isArchived().equals(archived)).toList(), pageable, tasks.size());
+        });
 
         // find all pageable
         lenient().when(taskRepository.findAll(Mockito.any(Pageable.class))).then((Answer<Page<Task>>) invocation -> {
@@ -336,17 +424,19 @@ public class TaskServiceTest {
         lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> {
             Query query = (Query) invocation.getArgument(0, Query.class);
             String search = "project";
-            return this.findTasks(search);
+            boolean inclArch = query.toString().contains("true");
+            return this.findTasks(search, inclArch);
         });
 
         lenient().when(mongoTemplate.count(Mockito.any(Query.class), Mockito.any(Class.class))).thenAnswer((Answer<Integer>) invocation -> {
             Query query = (Query) invocation.getArgument(0, Query.class);
             String search = "project";
-            return this.findTasks(search).size();
+            boolean inclArch = query.toString().contains("true");
+            return this.findTasks(search, inclArch).size();
         });
     }
 
-    private List<Task> findTasks(String search) {
+    private List<Task> findTasks(String search, boolean inclArch) {
         List<Task> taskList = new ArrayList<>();
         for (Task task : tasks) {
             if (task.getTitle().contains(search) ||
@@ -370,6 +460,10 @@ public class TaskServiceTest {
                 }
             }
         }
+        if (!inclArch) {
+            taskList = taskList.stream().filter(t -> t.getArchived().equals(Boolean.FALSE)).toList();
+        }
+
         return taskList.stream().distinct().collect(Collectors.toList());
     }
 }

@@ -130,10 +130,11 @@ public class TaskController {
     @Operation(summary = "Search Tasks")
     public TaskResponse searchTasks(
             @Parameter(name="searchString", description = "Search String", example = "clear database") @RequestParam("searchString") String searchString,
+            @Parameter(name="inclArchived", description = "Whether to include archived tasks", example = "true") @RequestParam(value = "inclArchived", defaultValue = "false", required = false) boolean inclArchived,
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        return taskService.searchTasks(searchString, pageNo, pageSize);
+        return taskService.searchTasks(searchString, inclArchived, pageNo, pageSize);
     }
 
     @ApiResponses({

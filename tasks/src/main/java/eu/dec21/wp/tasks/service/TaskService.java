@@ -12,9 +12,11 @@ public interface TaskService {
     Task getTaskById(String id);
     TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize);
     TaskResponse getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state, int pageNo, int pageSize);
+    TaskResponse getActualTasks(int pageNo, int pageSize);
+    TaskResponse getTasksByStateActual(TaskStates state, int pageNo, int pageSize);
 
     TaskResponse findAll(int pageNo, int pageSize);
-    TaskResponse searchTasks(String searchString, int pageNo, int pageSize);
+    TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize);
 
     void delete(String id);
     long count();

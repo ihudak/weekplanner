@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -43,12 +44,22 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse getAllTasksByCategoryId(Long categoryId, int pageNo, int pageSize) {
-        return getTaskResponse(taskRepository.getAllByCategoryId(categoryId, PageRequest.of(pageNo, pageSize)));
+        return getTaskResponse(taskRepository.getAllByCategoryIdAndArchived(categoryId, Boolean.TRUE, PageRequest.of(pageNo, pageSize)));
     }
 
     @Override
     public TaskResponse getAllTasksByCategoryIdAndState(Long categoryId, TaskStates state, int pageNo, int pageSize) {
-        return getTaskResponse(taskRepository.getAllByCategoryIdAndState(categoryId, state, PageRequest.of(pageNo, pageSize)));
+        return getTaskResponse(taskRepository.getAllByCategoryIdAndStateAndArchived(categoryId, state, Boolean.TRUE, PageRequest.of(pageNo, pageSize)));
+    }
+
+    @Override
+    public TaskResponse getActualTasks(int pageNo, int pageSize) {
+        return getTaskResponse(taskRepository.getAllByArchived(Boolean.FALSE, PageRequest.of(pageNo, pageSize)));
+    }
+
+    @Override
+    public TaskResponse getTasksByStateActual(TaskStates state, int pageNo, int pageSize) {
+        return getTaskResponse(taskRepository.getAllByStateAndArchived(state, Boolean.FALSE, PageRequest.of(pageNo, pageSize)));
     }
 
     @Override
@@ -58,7 +69,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse searchTasks(String searchString, int pageNo, int pageSize) {
+    public TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize) {
         if (searchString == null || searchString.isEmpty()) {
             return null;
         }
@@ -77,7 +88,14 @@ public class TaskServiceImpl implements TaskService {
         criteria.add(Criteria.where("blockingIssues").elemMatch(Criteria.where("name").regex(searchString, "i")));
         criteria.add(Criteria.where("blockingIssues").elemMatch(Criteria.where("url").regex(searchString, "i")));
 
-        query.addCriteria(new Criteria().orOperator(criteria));
+        if (!inclArchived) {
+            Criteria finalCriteria = new Criteria().andOperator(Criteria.where("archived").is(Boolean.FALSE), new Criteria().orOperator(criteria));
+            query.addCriteria(new Criteria().andOperator(finalCriteria));
+        } else {
+            query.addCriteria(new Criteria().orOperator(criteria));
+        }
+
+        query.with(Sort.by(Sort.Direction.DESC, "taskDateTime"));
         query.skip((long) pageNo * pageSize).limit(pageSize);
 
         return getTaskResponse(

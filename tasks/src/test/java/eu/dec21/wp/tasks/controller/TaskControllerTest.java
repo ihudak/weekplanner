@@ -333,10 +333,24 @@ public class TaskControllerTest {
         }
         tasks.get(0).setTitle("boo");
         tasks.get(4).setTitle("foo");
+        tasks.get(1).archive();
 
         ResultActions response = mockMvc.perform(get("/api/v1/tasks/search?searchString=project&pageNo=0&pageSize=10")
                 .contentType(MediaType.APPLICATION_JSON));
 
+        response.andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pageNo").value(0))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.pageSize").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalElements").value(2))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.totalPages").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.last").value(true))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[0].taskId").value(tasks.get(2).getTaskId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[1].taskId").value(tasks.get(3).getTaskId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.content[2].taskId").doesNotExist())
+                .andDo(MockMvcResultHandlers.print());
+
+        response = mockMvc.perform(get("/api/v1/tasks/search?searchString=project&inclArchived=true&pageNo=0&pageSize=10")
+                .contentType(MediaType.APPLICATION_JSON));
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.pageNo").value(0))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.pageSize").value(3))
@@ -455,12 +469,16 @@ public class TaskControllerTest {
             return new TaskResponse(tasks, pageNo, min(pageSize, tasks.size()), tasks.size(), 1, true);
         });
 
-        when(taskService.searchTasks(anyString(), anyInt(), anyInt())).then((Answer<TaskResponse>) invocation -> {
+        when(taskService.searchTasks(anyString(), anyBoolean(), anyInt(), anyInt())).then((Answer<TaskResponse>) invocation -> {
             String searchStr = (String) invocation.getArgument(0, String.class);
-            Integer pageNo = (Integer) invocation.getArgument(1, Integer.class);
-            Integer pageSize = (Integer) invocation.getArgument(2, Integer.class);
+            Boolean inclArchived = (Boolean) invocation.getArgument(1, Boolean.class);
+            Integer pageNo = (Integer) invocation.getArgument(2, Integer.class);
+            Integer pageSize = (Integer) invocation.getArgument(3, Integer.class);
 
             List<Task> taskList = tasks.stream().filter(a -> a.getTitle().contains(searchStr)).toList();
+            if (!inclArchived) {
+                taskList = taskList.stream().filter(t -> t.getArchived().equals(Boolean.FALSE)).toList();
+            }
             return new TaskResponse(taskList, pageNo, min(pageSize, taskList.size()), taskList.size(), 1, true);
         });
 
