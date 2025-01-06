@@ -263,4 +263,12 @@ public class Task {
     public void archive() {
         this.archived = Boolean.TRUE;
     }
+
+    public Boolean isComplete() {
+        return this.state.isDone();
+    }
+
+    public Boolean isToDo() {
+        return !this.state.isDone() && !this.archived;
+    }
 }

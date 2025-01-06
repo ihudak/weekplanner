@@ -180,18 +180,18 @@ public class TaskTest {
     @Test
     void setBlockReason() {
         Task task = new Task();
-        assertEquals(Boolean.FALSE, task.isBlocked());
+        assertFalse(task.isBlocked());
         task.setBlockReason("");
         assertEquals("", task.getBlockReason());
-        assertEquals(Boolean.FALSE, task.isBlocked());
+        assertFalse(task.isBlocked());
 
         task.setBlockReason("something");
         assertEquals("something", task.getBlockReason());
-        assertEquals(Boolean.TRUE, task.getIsBlocked());
+        assertTrue(task.getIsBlocked());
 
         task.setBlockReason(null);
         assertNull(task.getBlockReason());
-        assertEquals(Boolean.TRUE, task.isBlocked());
+        assertTrue(task.isBlocked());
 
         final Faker faker = new Faker();
         int length = 255;
@@ -209,10 +209,10 @@ public class TaskTest {
 
         task.setBlockingIssues(null);
         assertNull(task.getBlockingIssues());
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
 
         TaskLink link1 = new TaskLink("text1", "https://example1.com");
         TaskLink link2 = new TaskLink("text2", "https://example2.com");
@@ -222,10 +222,10 @@ public class TaskTest {
 
         task.setBlockingIssues(links);
         assertEquals(links, task.getBlockingIssues());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
 
         TaskLink link3 = new TaskLink("text3", "https://example3.com");
         task.addBlockLink(link3);
@@ -244,10 +244,10 @@ public class TaskTest {
         assertEquals(2, task.getBlockingIssues().size());
         assertEquals(link1, task.getBlockingIssues().get(0));
         assertEquals(link3, task.getBlockingIssues().get(1));
-        assertEquals(Boolean.TRUE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getIsBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
 
         assertThrows(NullPointerException.class, () -> task.removeBlockLink(null));
         assertThrows(NullPointerException.class, () -> task.addBlockLink(null));
@@ -255,62 +255,62 @@ public class TaskTest {
         assertEquals(2, task.getBlockingIssues().size());
         task.clearBlockLinks();
         assertNull(task.getBlockingIssues());
-        assertEquals(Boolean.TRUE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getIsBlocked());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
     }
 
     @Test
     void setIsBlocked() {
         Task task = new Task();
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.FALSE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isBlocked());
+        assertFalse(task.getIsBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
         task.setIsBlocked(true);
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.isBlocked());
+        assertTrue(task.getIsBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
         task.unblock();
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.FALSE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isBlocked());
+        assertFalse(task.getIsBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
         task.block();
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.getIsBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.isBlocked());
+        assertTrue(task.getIsBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
     }
 
     @Test
     void setIsActive() {
         Task task = new Task();
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.TRUE, task.getIsActive());
+        assertTrue(task.isActive());
+        assertTrue(task.getIsActive());
 
         task.deactivate();
-        assertEquals(Boolean.FALSE, task.isActive());
-        assertEquals(Boolean.FALSE, task.getIsActive());
+        assertFalse(task.isActive());
+        assertFalse(task.getIsActive());
 
         task.activate();
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.TRUE, task.getIsActive());
+        assertTrue(task.isActive());
+        assertTrue(task.getIsActive());
 
         task.setIsActive(false);
-        assertEquals(Boolean.FALSE, task.isActive());
-        assertEquals(Boolean.FALSE, task.getIsActive());
+        assertFalse(task.isActive());
+        assertFalse(task.getIsActive());
 
         task.setIsActive(true);
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.TRUE, task.getIsActive());
+        assertTrue(task.isActive());
+        assertTrue(task.getIsActive());
     }
 
     @Test
@@ -319,148 +319,172 @@ public class TaskTest {
         task.block();
 
         assertEquals(TaskStates.PREP, task.getState());
-        assertEquals(Boolean.TRUE, task.getState().isNew());
-        assertEquals(Boolean.FALSE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getState().isNew());
+        assertFalse(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.nextState();
         assertEquals(TaskStates.READY, task.getState());
-        assertEquals(Boolean.TRUE, task.getState().isNew());
-        assertEquals(Boolean.FALSE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getState().isNew());
+        assertFalse(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.nextState();
         assertEquals(TaskStates.IMPL, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.nextState();
         assertEquals(TaskStates.DONE, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.TRUE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertTrue(task.getState().isDone());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertTrue(task.isComplete());
+        assertFalse(task.isToDo());
 
         task.nextState();
         assertEquals(TaskStates.DONE, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.TRUE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertTrue(task.getState().isDone());
+        assertFalse(task.isBlocked());
         task.block(); // should not block completed task
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertTrue(task.isComplete());
+        assertFalse(task.isToDo());
 
         task.cancel();
         assertEquals(TaskStates.CANCEL, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.TRUE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertTrue(task.getState().isDone());
+        assertFalse(task.isBlocked());
         task.block(); // should not block completed task
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertTrue(task.isComplete());
+        assertFalse(task.isToDo());
 
         task.nextState();
         assertEquals(TaskStates.CANCEL, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.TRUE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertTrue(task.getState().isDone());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertTrue(task.isComplete());
+        assertFalse(task.isToDo());
 
         task.complete();
         assertEquals(TaskStates.DONE, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.TRUE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertTrue(task.getState().isDone());
+        assertFalse(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertTrue(task.isComplete());
+        assertFalse(task.isToDo());
 
         task.reopen();
         assertEquals(TaskStates.READY, task.getState());
-        assertEquals(Boolean.TRUE, task.getState().isNew());
-        assertEquals(Boolean.FALSE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.FALSE, task.isBlocked());
+        assertTrue(task.getState().isNew());
+        assertFalse(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertFalse(task.isBlocked());
         task.block();
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.prevState();
         assertEquals(TaskStates.PREP, task.getState());
-        assertEquals(Boolean.TRUE, task.getState().isNew());
-        assertEquals(Boolean.FALSE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getState().isNew());
+        assertFalse(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.prevState();
         assertEquals(TaskStates.PREP, task.getState());
-        assertEquals(Boolean.TRUE, task.getState().isNew());
-        assertEquals(Boolean.FALSE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertTrue(task.getState().isNew());
+        assertFalse(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
 
         task.start();
         assertEquals(TaskStates.IMPL, task.getState());
-        assertEquals(Boolean.FALSE, task.getState().isNew());
-        assertEquals(Boolean.TRUE, task.getState().isStarted());
-        assertEquals(Boolean.FALSE, task.getState().isDone());
-        assertEquals(Boolean.TRUE, task.isBlocked());
-        assertEquals(Boolean.TRUE, task.isActive());
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.getState().isNew());
+        assertTrue(task.getState().isStarted());
+        assertFalse(task.getState().isDone());
+        assertTrue(task.isBlocked());
+        assertTrue(task.isActive());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
+        assertFalse(task.isComplete());
+        assertTrue(task.isToDo());
     }
 
     @Test
     void archiving() {
         Task task = new Task();
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
 
         task.archive();
-        assertEquals(Boolean.TRUE, task.isArchived());
-        assertEquals(Boolean.FALSE, task.isActual());
+        assertTrue(task.isArchived());
+        assertFalse(task.isActual());
 
         task.setArchived(Boolean.FALSE);
-        assertEquals(Boolean.FALSE, task.isArchived());
-        assertEquals(Boolean.TRUE, task.isActual());
+        assertFalse(task.isArchived());
+        assertTrue(task.isActual());
 
         task.setArchived(Boolean.TRUE);
-        assertEquals(Boolean.TRUE, task.isArchived());
-        assertEquals(Boolean.FALSE, task.isActual());
+        assertTrue(task.isArchived());
+        assertFalse(task.isActual());
     }
 
     @Test

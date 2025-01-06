@@ -18,6 +18,10 @@ public interface TaskService {
     TaskResponse findAll(int pageNo, int pageSize);
     TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize);
 
+    List<Task> allTasksOfWeek(int weekNo, int year);
+    List<Task> activeTasksOfWeek(int weekNo, int year);
+    List<Task> completeTasksOfWeek(int weekNo, int year);
+
     void delete(String id);
     long count();
 }

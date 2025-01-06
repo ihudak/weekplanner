@@ -1,5 +1,6 @@
 package eu.dec21.wp.tasks.service;
 
+import eu.dec21.wp.exceptions.BadRequestException;
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.tasks.collection.*;
 import eu.dec21.wp.tasks.repository.TaskRepository;
@@ -21,8 +22,15 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.chrono.ChronoLocalDateTime;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -239,6 +247,11 @@ public class TaskServiceTest {
         for (Task task : response.getContent()) {
             assertEquals("my project in dec", task.getTitle());
         }
+
+        assertThrowsExactly(BadRequestException.class, () -> taskService.searchTasks("", false, 0, 5));
+        assertThrowsExactly(BadRequestException.class, () -> taskService.searchTasks(null, true, 0, 5));
+        assertThrowsExactly(BadRequestException.class, () -> taskService.searchTasks("a", false, 0, 5));
+        assertThrowsExactly(BadRequestException.class, () -> taskService.searchTasks("ab", true, 0, 5));
     }
 
     @Test
@@ -297,7 +310,124 @@ public class TaskServiceTest {
         assertEquals(5, tasks.size());
     }
 
-    // ToDo: implement rest of the tests
+    @Test
+    void weekStart() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        LocalDateTime week5Year2025 = LocalDate.of(2025, 1, 26).atStartOfDay();
+        assertEquals(week5Year2025, getweekStartMethod().invoke(taskService, 5, 2025));
+
+        week5Year2025 = LocalDate.of(2025, 1, 27).atStartOfDay();
+        assertEquals(week5Year2025, getweekStartLocaleMethod().invoke(taskService, 5, 2025, Locale.GERMANY));
+    }
+
+    @Test
+    void allTasksOfWeek() {
+        int weekNo = this.getCurrentWeekNo();
+        int year = LocalDate.now().getYear();
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByWeek(weekNo, year));
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(15));
+            } else if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            } else {
+                task.setTaskDateTime(LocalDateTime.now().plusDays(15));
+            }
+        }
+
+        List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
+        assertEquals(8, taskList.size());
+        for (Task task : taskList) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            assertEquals(0, taskId % 3);
+            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+        }
+    }
+
+    @Test
+    void activeTasksOfWeek() {
+        int weekNo = this.getCurrentWeekNo();
+        int year = LocalDate.now().getYear();
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByWeek(weekNo, year).stream().filter(Task::isToDo).toList());
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            task.setTaskDateTime(LocalDateTime.now().plusDays(15));
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(15));
+                task.complete();
+            } else if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            }
+            if (taskId % 5 == 0) {
+                task.archive();
+            }
+        }
+
+        List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
+        assertEquals(6, taskList.size());
+        for (Task task : taskList) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            assertEquals(0, taskId % 3);
+            assertTrue(task.isActual());
+            assertTrue(task.getState() != TaskStates.DONE && task.getState() != TaskStates.CANCEL);
+            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+        }
+    }
+
+    @Test
+    void inactiveTasksOfWeek() {
+        int weekNo = this.getCurrentWeekNo();
+        int year = LocalDate.now().getYear();
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByWeek(weekNo, year).stream().filter(Task::isComplete).toList());
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            task.setTaskDateTime(LocalDateTime.now().plusDays(15));
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(15));
+                task.complete();
+            }
+            if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            }
+            if (taskId % 5 != 0) {
+                task.archive();
+            }
+        }
+
+        List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
+        assertEquals(2, taskList.size());
+        for (Task task : taskList) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            assertEquals(0, taskId % 3);
+            assertFalse(task.isArchived());
+            assertTrue(task.getState() == TaskStates.DONE || task.getState() == TaskStates.CANCEL);
+            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+        }
+    }
+
+    private Method getweekStartMethod() throws NoSuchMethodException {
+        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekStart", Integer.class, Integer.class);
+        method.setAccessible(true);
+        return method;
+    }
+
+    private Method getweekStartLocaleMethod() throws NoSuchMethodException {
+        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekStart", Integer.class, Integer.class, Locale.class);
+        method.setAccessible(true);
+        return method;
+    }
 
     private void setupMocks() {
         //count
@@ -465,5 +595,29 @@ public class TaskServiceTest {
         }
 
         return taskList.stream().distinct().collect(Collectors.toList());
+    }
+
+    private ArrayList<Task> filterTasksByWeek(int weekNo, int year) {
+        ArrayList<Task> taskList = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.isActual() &&
+                    task.getTaskDateTime().isAfter(ChronoLocalDateTime.from(this.getWeekStart(weekNo, year))) &&
+                    task.getTaskDateTime().isBefore(ChronoLocalDateTime.from(this.getWeekStart(weekNo, year).plusWeeks(1)))) {
+                taskList.add(task);
+            }
+        }
+        return taskList;
+    }
+
+    private LocalDateTime getWeekStart(Integer weekNo, Integer year) {
+        // Get the first day of the specified week
+        return LocalDate.ofYearDay(year, 1)
+                .with(WeekFields.of(Locale.getDefault()).weekOfYear(), weekNo)
+                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1).atStartOfDay();
+    }
+
+    private int getCurrentWeekNo() {
+        WeekFields weekFields = WeekFields.of(Locale.getDefault());
+        return LocalDate.now().get(weekFields.weekOfWeekBasedYear());
     }
 }

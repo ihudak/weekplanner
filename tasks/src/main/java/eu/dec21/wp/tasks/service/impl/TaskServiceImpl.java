@@ -1,5 +1,6 @@
 package eu.dec21.wp.tasks.service.impl;
 
+import eu.dec21.wp.exceptions.BadRequestException;
 import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.tasks.collection.Task;
 import eu.dec21.wp.tasks.collection.TaskResponse;
@@ -17,8 +18,12 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.WeekFields;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Service
 public class TaskServiceImpl implements TaskService {
@@ -70,8 +75,8 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize) {
-        if (searchString == null || searchString.isEmpty()) {
-            return null;
+        if (searchString == null || searchString.length() < 3) {
+            throw new BadRequestException("Search string must be at least 3 characters");
         }
 
         Pageable pageable = PageRequest.of(pageNo, pageSize);
@@ -107,6 +112,27 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
+    public List<Task> allTasksOfWeek(int weekNo, int year) {
+        return mongoTemplate.find(this.weekTasksQuery(this.prepareWeekCriteria(weekNo, year)), Task.class);
+    }
+
+    @Override
+    public List<Task> activeTasksOfWeek(int weekNo, int year) {
+        List<Criteria> criteria = this.prepareWeekCriteria(weekNo, year);
+        criteria.add(Criteria.where("state").in(TaskStates.activeStates()));
+
+        return mongoTemplate.find(this.weekTasksQuery(criteria), Task.class);
+    }
+
+    @Override
+    public List<Task> completeTasksOfWeek(int weekNo, int year) {
+        List<Criteria> criteria = this.prepareWeekCriteria(weekNo, year);
+        criteria.add(Criteria.where("state").in(TaskStates.inactiveStates()));
+
+        return mongoTemplate.find(this.weekTasksQuery(criteria), Task.class);
+    }
+
+    @Override
     public Task getTaskById(String id) {
         return taskRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
@@ -120,7 +146,10 @@ public class TaskServiceImpl implements TaskService {
         taskRepository.deleteById(id);
     }
 
-
+    @Override
+    public long count() {
+        return taskRepository.count();
+    }
 
     private TaskResponse getTaskResponse(Page<Task> tasks) {
         List<Task> taskList = tasks.getContent();
@@ -136,8 +165,31 @@ public class TaskServiceImpl implements TaskService {
         return taskResponse;
     }
 
-    @Override
-    public long count() {
-        return taskRepository.count();
+    private LocalDateTime getWeekStart(Integer weekNo, Integer year) {
+        return this.getWeekStart(weekNo, year, Locale.getDefault());
+    }
+
+    private LocalDateTime getWeekStart(Integer weekNo, Integer year, Locale locale) {
+        // Get the first day of the specified week
+        return LocalDate.ofYearDay(year, 1)
+                .with(WeekFields.of(locale).weekOfYear(), weekNo)
+                .with(WeekFields.of(locale).dayOfWeek(), 1).atStartOfDay();
+    }
+
+    private List<Criteria> prepareWeekCriteria(int weekNo, int year) {
+        LocalDateTime startDate = this.getWeekStart(weekNo, year);
+        List<Criteria> criteria = new ArrayList<>();
+
+        criteria.add(Criteria.where("archived").is(Boolean.FALSE));
+        criteria.add(Criteria.where("taskDateTime").gte(startDate));
+        criteria.add(Criteria.where("taskDateTime").lt(startDate.plusWeeks(1)));
+        return criteria;
+    }
+
+    private Query weekTasksQuery(List<Criteria> criteria) {
+        Query query = new Query();
+        query.addCriteria(new Criteria().andOperator(criteria));
+        query.with(Sort.by(Sort.Direction.DESC, "taskDateTime"));
+        return query;
     }
 }
