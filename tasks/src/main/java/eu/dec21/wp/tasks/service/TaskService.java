@@ -22,6 +22,10 @@ public interface TaskService {
     List<Task> activeTasksOfWeek(int weekNo, int year);
     List<Task> completeTasksOfWeek(int weekNo, int year);
 
+    List<Task> allTasksOfDay(int plusDaysFromToday);
+    List<Task> activeTasksOfDay(int plusDaysFromToday);
+    List<Task> completeTasksOfDay(int plusDaysFromToday);
+
     void delete(String id);
     long count();
 }

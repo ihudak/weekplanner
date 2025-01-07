@@ -311,12 +311,12 @@ public class TaskServiceTest {
     }
 
     @Test
-    void weekStart() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
-        LocalDateTime week5Year2025 = LocalDate.of(2025, 1, 26).atStartOfDay();
-        assertEquals(week5Year2025, getweekStartMethod().invoke(taskService, 5, 2025));
+    void weekEnd() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        LocalDateTime week5Year2025End = LocalDate.of(2025, 1, 26).plusWeeks(1).atStartOfDay();
+        assertEquals(week5Year2025End, getWeekEndMethod().invoke(taskService, 5, 2025));
 
-        week5Year2025 = LocalDate.of(2025, 1, 27).atStartOfDay();
-        assertEquals(week5Year2025, getweekStartLocaleMethod().invoke(taskService, 5, 2025, Locale.GERMANY));
+        week5Year2025End = LocalDate.of(2025, 1, 27).plusWeeks(1).atStartOfDay();
+        assertEquals(week5Year2025End, getWeekEndLocaleMethod().invoke(taskService, 5, 2025, Locale.GERMANY));
     }
 
     @Test
@@ -336,15 +336,16 @@ public class TaskServiceTest {
             } else {
                 task.setTaskDateTime(LocalDateTime.now().plusDays(15));
             }
+            if (taskId % 5 == 0) {
+                task.archive();
+            }
         }
 
         List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
-        assertEquals(8, taskList.size());
+        assertEquals(26, taskList.size());
         for (Task task : taskList) {
-            int taskId = Integer.parseInt(task.getTaskId());
-            assertEquals(0, taskId % 3);
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd(weekNo, year)));
+            assertFalse(task.isArchived());
         }
     }
 
@@ -361,7 +362,9 @@ public class TaskServiceTest {
             task.setTaskDateTime(LocalDateTime.now().plusDays(15));
             if (taskId % 2 == 0) {
                 task.setTaskDateTime(LocalDateTime.now().minusDays(15));
-                task.complete();
+                if (taskId % 4 == 0) {
+                    task.complete();
+                }
             } else if (taskId % 3 == 0) {
                 task.setTaskDateTime(LocalDateTime.now());
             }
@@ -370,15 +373,13 @@ public class TaskServiceTest {
             }
         }
 
-        List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
-        assertEquals(6, taskList.size());
+        List<Task> taskList = taskService.activeTasksOfWeek(weekNo, year);
+        assertEquals(16, taskList.size());
         for (Task task : taskList) {
             int taskId = Integer.parseInt(task.getTaskId());
-            assertEquals(0, taskId % 3);
             assertTrue(task.isActual());
             assertTrue(task.getState() != TaskStates.DONE && task.getState() != TaskStates.CANCEL);
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd(weekNo, year)));
         }
     }
 
@@ -395,7 +396,9 @@ public class TaskServiceTest {
             task.setTaskDateTime(LocalDateTime.now().plusDays(15));
             if (taskId % 2 == 0) {
                 task.setTaskDateTime(LocalDateTime.now().minusDays(15));
-                task.complete();
+                if (taskId % 4 == 0) {
+                    task.complete();
+                }
             }
             if (taskId % 3 == 0) {
                 task.setTaskDateTime(LocalDateTime.now());
@@ -405,26 +408,114 @@ public class TaskServiceTest {
             }
         }
 
-        List<Task> taskList = taskService.allTasksOfWeek(weekNo, year);
-        assertEquals(2, taskList.size());
+        List<Task> taskList = taskService.completeTasksOfWeek(weekNo, year);
+        assertEquals(3, taskList.size());
         for (Task task : taskList) {
-            int taskId = Integer.parseInt(task.getTaskId());
-            assertEquals(0, taskId % 3);
             assertFalse(task.isArchived());
             assertTrue(task.getState() == TaskStates.DONE || task.getState() == TaskStates.CANCEL);
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart(weekNo, year)));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart(weekNo, year).plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd(weekNo, year)));
         }
     }
 
-    private Method getweekStartMethod() throws NoSuchMethodException {
-        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekStart", Integer.class, Integer.class);
+    @Test
+    void allTasksOfDay() {
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByDay(0));
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(3));
+            } else if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            } else {
+                task.setTaskDateTime(LocalDateTime.now().plusDays(3));
+            }
+            if (taskId % 5 == 0) {
+                task.archive();
+            }
+        }
+
+        List<Task> taskList = taskService.activeTasksOfDay(0);
+        assertEquals(26, taskList.size());
+        for (Task task : taskList) {
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
+            assertFalse(task.isArchived());
+        }
+    }
+
+    @Test
+    void activeTasksOfDay() {
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByDay(0).stream().filter(Task::isToDo).toList());
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            task.setTaskDateTime(LocalDateTime.now().plusDays(3));
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(3));
+                if (taskId % 4 == 0) {
+                    task.complete();
+                }
+            } else if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            }
+            if (taskId % 5 == 0) {
+                task.archive();
+            }
+        }
+
+        List<Task> taskList = taskService.activeTasksOfDay(0);
+        assertEquals(16, taskList.size());
+        for (Task task : taskList) {
+            assertTrue(task.isActual());
+            assertTrue(task.getState() != TaskStates.DONE && task.getState() != TaskStates.CANCEL);
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
+        }
+    }
+
+    @Test
+    void completeTasksOfDay() {
+        // mongo template find
+        lenient().when(mongoTemplate.find(Mockito.any(Query.class), Mockito.any())).then((Answer<List<Task>>) invocation -> this.filterTasksByDay(0).stream().filter(Task::isComplete).toList());
+
+        tasks = taskDirector.constructRandomTasks(50);
+        for (Task task : tasks) {
+            int taskId = Integer.parseInt(task.getTaskId());
+            task.setTaskDateTime(LocalDateTime.now().plusDays(15));
+            if (taskId % 2 == 0) {
+                task.setTaskDateTime(LocalDateTime.now().minusDays(15));
+                if (taskId % 4 == 0) {
+                    task.complete();
+                }
+            }
+            if (taskId % 3 == 0) {
+                task.setTaskDateTime(LocalDateTime.now());
+            }
+            if (taskId % 5 != 0) {
+                task.archive();
+            }
+        }
+
+        List<Task> taskList = taskService.completeTasksOfDay(0);
+        assertEquals(3, taskList.size());
+        for (Task task : taskList) {
+            assertFalse(task.isArchived());
+            assertTrue(task.getState() == TaskStates.DONE || task.getState() == TaskStates.CANCEL);
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
+        }
+    }
+
+    private Method getWeekEndMethod() throws NoSuchMethodException {
+        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekEnd", Integer.class, Integer.class);
         method.setAccessible(true);
         return method;
     }
 
-    private Method getweekStartLocaleMethod() throws NoSuchMethodException {
-        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekStart", Integer.class, Integer.class, Locale.class);
+    private Method getWeekEndLocaleMethod() throws NoSuchMethodException {
+        Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekEnd", Integer.class, Integer.class, Locale.class);
         method.setAccessible(true);
         return method;
     }
@@ -601,19 +692,29 @@ public class TaskServiceTest {
         ArrayList<Task> taskList = new ArrayList<>();
         for (Task task : tasks) {
             if (task.isActual() &&
-                    task.getTaskDateTime().isAfter(ChronoLocalDateTime.from(this.getWeekStart(weekNo, year))) &&
-                    task.getTaskDateTime().isBefore(ChronoLocalDateTime.from(this.getWeekStart(weekNo, year).plusWeeks(1)))) {
+                    task.getTaskDateTime().isBefore(ChronoLocalDateTime.from(this.getWeekEnd(weekNo, year)))) {
                 taskList.add(task);
             }
         }
         return taskList;
     }
 
-    private LocalDateTime getWeekStart(Integer weekNo, Integer year) {
+    private ArrayList<Task> filterTasksByDay(int daysAdd) {
+        ArrayList<Task> taskList = new ArrayList<>();
+        for (Task task : tasks) {
+            if (task.isActual() &&
+                    task.getTaskDateTime().isBefore(LocalDate.now().plusDays(daysAdd + 1).atStartOfDay())) {
+                taskList.add(task);
+            }
+        }
+        return taskList;
+    }
+
+    private LocalDateTime getWeekEnd(Integer weekNo, Integer year) {
         // Get the first day of the specified week
         return LocalDate.ofYearDay(year, 1)
                 .with(WeekFields.of(Locale.getDefault()).weekOfYear(), weekNo)
-                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1).atStartOfDay();
+                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1).plusWeeks(1).atStartOfDay();
     }
 
     private int getCurrentWeekNo() {

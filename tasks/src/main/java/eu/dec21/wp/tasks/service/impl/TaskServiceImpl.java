@@ -113,23 +113,40 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public List<Task> allTasksOfWeek(int weekNo, int year) {
-        return mongoTemplate.find(this.weekTasksQuery(this.prepareWeekCriteria(weekNo, year)), Task.class);
+        return mongoTemplate.find(this.dateBasedTasksQuery(this.prepareWeekCriteria(weekNo, year)), Task.class);
     }
 
     @Override
     public List<Task> activeTasksOfWeek(int weekNo, int year) {
         List<Criteria> criteria = this.prepareWeekCriteria(weekNo, year);
         criteria.add(Criteria.where("state").in(TaskStates.activeStates()));
-
-        return mongoTemplate.find(this.weekTasksQuery(criteria), Task.class);
+        return mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
     }
 
     @Override
     public List<Task> completeTasksOfWeek(int weekNo, int year) {
         List<Criteria> criteria = this.prepareWeekCriteria(weekNo, year);
         criteria.add(Criteria.where("state").in(TaskStates.inactiveStates()));
+        return mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+    }
 
-        return mongoTemplate.find(this.weekTasksQuery(criteria), Task.class);
+    @Override
+    public List<Task> allTasksOfDay(int plusDaysFromToday) {
+        return mongoTemplate.find(this.dateBasedTasksQuery(this.prepareDayCriteria(plusDaysFromToday)), Task.class);
+    }
+
+    @Override
+    public List<Task> activeTasksOfDay(int plusDaysFromToday) {
+        List<Criteria> criteria = this.prepareDayCriteria(plusDaysFromToday);
+        criteria.add(Criteria.where("state").in(TaskStates.activeStates()));
+        return mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+    }
+
+    @Override
+    public List<Task> completeTasksOfDay(int plusDaysFromToday) {
+        List<Criteria> criteria = this.prepareDayCriteria(plusDaysFromToday);
+        criteria.add(Criteria.where("state").in(TaskStates.inactiveStates()));
+        return mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
     }
 
     @Override
@@ -165,28 +182,38 @@ public class TaskServiceImpl implements TaskService {
         return taskResponse;
     }
 
-    private LocalDateTime getWeekStart(Integer weekNo, Integer year) {
-        return this.getWeekStart(weekNo, year, Locale.getDefault());
+    private LocalDateTime getWeekEnd(Integer weekNo, Integer year) {
+        return this.getWeekEnd(weekNo, year, Locale.getDefault());
     }
 
-    private LocalDateTime getWeekStart(Integer weekNo, Integer year, Locale locale) {
+    private LocalDateTime getWeekEnd(Integer weekNo, Integer year, Locale locale) {
         // Get the first day of the specified week
         return LocalDate.ofYearDay(year, 1)
                 .with(WeekFields.of(locale).weekOfYear(), weekNo)
-                .with(WeekFields.of(locale).dayOfWeek(), 1).atStartOfDay();
+                .with(WeekFields.of(locale).dayOfWeek(), 1).plusWeeks(1).atStartOfDay();
     }
 
     private List<Criteria> prepareWeekCriteria(int weekNo, int year) {
-        LocalDateTime startDate = this.getWeekStart(weekNo, year);
+        LocalDateTime endDate = this.getWeekEnd(weekNo, year).plusWeeks(1);
+        return getDateCriteria(endDate);
+    }
+
+    private List<Criteria> prepareDayCriteria(int plusDays) {
+        LocalDateTime endDate = LocalDate.now().plusDays(plusDays + 1).atStartOfDay();
+        return getDateCriteria(endDate);
+    }
+
+    private List<Criteria> getDateCriteria(LocalDateTime endDate) {
         List<Criteria> criteria = new ArrayList<>();
+        LocalDateTime startDate = LocalDateTime.of(1970, 1, 1, 0, 0);
 
         criteria.add(Criteria.where("archived").is(Boolean.FALSE));
-        criteria.add(Criteria.where("taskDateTime").gte(startDate));
-        criteria.add(Criteria.where("taskDateTime").lt(startDate.plusWeeks(1)));
+        criteria.add(Criteria.where("taskDateTime").gte(startDate)); // make sure index is used
+        criteria.add(Criteria.where("taskDateTime").lt(endDate));
         return criteria;
     }
 
-    private Query weekTasksQuery(List<Criteria> criteria) {
+    private Query dateBasedTasksQuery(List<Criteria> criteria) {
         Query query = new Query();
         query.addCriteria(new Criteria().andOperator(criteria));
         query.with(Sort.by(Sort.Direction.DESC, "taskDateTime"));

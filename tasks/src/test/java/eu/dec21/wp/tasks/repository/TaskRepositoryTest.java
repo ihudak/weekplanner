@@ -339,13 +339,12 @@ public class TaskRepositoryTest {
         this.prepareTasks(50);
         this.archiveTasks(3);
 
-        List<Task> tasks = mongoTemplate.find(this.makeWeekQuery(this.prepareWeekCriteria()), Task.class);
-        assertEquals(16, tasks.size());
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(this.prepareWeekCriteria(this.getWeekEnd())), Task.class);
+        assertEquals(23, tasks.size());
 
         for (Task task : tasks) {
             assertTrue(task.isActual());
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart()));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart().plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd()));
         }
     }
 
@@ -353,17 +352,16 @@ public class TaskRepositoryTest {
     void mongoTemplateGetActiveByWeek() {
         this.prepareTasks(50);
         this.archiveTasks(3);
-        List<Criteria> criteria = this.prepareWeekCriteria();
+        List<Criteria> criteria = this.prepareWeekCriteria(this.getWeekEnd());
         criteria.add(Criteria.where("state").in(TaskStates.activeStates()));
 
-        List<Task> tasks = mongoTemplate.find(this.makeWeekQuery(criteria), Task.class);
-        assertEquals(9, tasks.size());
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+        assertEquals(12, tasks.size());
 
         for (Task task : tasks) {
             assertTrue(task.isActual());
             assertFalse(task.isComplete());
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart()));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart().plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd()));
         }
     }
 
@@ -371,17 +369,63 @@ public class TaskRepositoryTest {
     void mongoTemplateGetCompleteByWeek() {
         this.prepareTasks(50);
         this.archiveTasks(3);
-        List<Criteria> criteria = this.prepareWeekCriteria();
+        List<Criteria> criteria = this.prepareWeekCriteria(this.getWeekEnd());
         criteria.add(Criteria.where("state").in(TaskStates.inactiveStates()));
 
-        List<Task> tasks = mongoTemplate.find(this.makeWeekQuery(criteria), Task.class);
-        assertEquals(7, tasks.size());
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+        assertEquals(11, tasks.size());
 
         for (Task task : tasks) {
             assertTrue(task.isActual());
             assertTrue(task.isComplete());
-            assertTrue(task.getTaskDateTime().isAfter(this.getWeekStart()));
-            assertTrue(task.getTaskDateTime().isBefore(this.getWeekStart().plusWeeks(1)));
+            assertTrue(task.getTaskDateTime().isBefore(this.getWeekEnd()));
+        }
+    }
+
+    @Test
+    void mongoTemplateGetAllByDay() {
+        this.prepareTasks(50);
+        this.archiveTasks(3);
+
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(this.prepareWeekCriteria(LocalDate.now().plusDays(1).atStartOfDay())), Task.class);
+        assertEquals(23, tasks.size());
+        for (Task task : tasks) {
+            assertTrue(task.isActual());
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
+        }
+    }
+
+    @Test
+    void mongoTemplateGetActiveByDay() {
+        this.prepareTasks(50);
+        this.archiveTasks(3);
+        List<Criteria> criteria = this.prepareWeekCriteria(LocalDate.now().plusDays(1).atStartOfDay());
+        criteria.add(Criteria.where("state").in(TaskStates.activeStates()));
+
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+        assertEquals(12, tasks.size());
+
+        for (Task task : tasks) {
+            assertTrue(task.isActual());
+            assertFalse(task.isComplete());
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
+        }
+    }
+
+    @Test
+    void mongoTemplateGetCompleteByDay() {
+        this.prepareTasks(50);
+        this.archiveTasks(3);
+        List<Criteria> criteria = this.prepareWeekCriteria(LocalDate.now().plusDays(1).atStartOfDay());
+        criteria.add(Criteria.where("state").in(TaskStates.inactiveStates()));
+
+        List<Task> tasks = mongoTemplate.find(this.dateBasedTasksQuery(criteria), Task.class);
+        assertEquals(11, tasks.size());
+
+        for (Task task : tasks) {
+            assertTrue(task.isActual());
+            assertTrue(task.isComplete());
+            assertTrue(task.getTaskDateTime().isBefore(LocalDate.now().plusDays(1).atStartOfDay()));
         }
     }
 
@@ -523,24 +567,22 @@ public class TaskRepositoryTest {
         return LocalDate.now().get(weekFields.weekOfWeekBasedYear());
     }
 
-    private LocalDateTime getWeekStart() {
+    private LocalDateTime getWeekEnd() {
         // Get the first day of the specified week
         return LocalDate.ofYearDay(LocalDate.now().getYear(), 1)
                 .with(WeekFields.of(Locale.getDefault()).weekOfYear(), this.getCurrentWeekNo())
-                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1).atStartOfDay();
+                .with(WeekFields.of(Locale.getDefault()).dayOfWeek(), 1).plusWeeks(1).atStartOfDay();
     }
 
-    private List<Criteria> prepareWeekCriteria() {
-        LocalDateTime startDate = this.getWeekStart();
+    private List<Criteria> prepareWeekCriteria(LocalDateTime endDate) {
         List<Criteria> criteria = new ArrayList<>();
 
         criteria.add(Criteria.where("archived").is(Boolean.FALSE));
-        criteria.add(Criteria.where("taskDateTime").gte(startDate));
-        criteria.add(Criteria.where("taskDateTime").lt(startDate.plusWeeks(1)));
+        criteria.add(Criteria.where("taskDateTime").lt(endDate));
         return criteria;
     }
 
-    private Query makeWeekQuery(List<Criteria> criteria) {
+    private Query dateBasedTasksQuery(List<Criteria> criteria) {
         Query query = new Query();
         query.addCriteria(new Criteria().andOperator(criteria));
         query.with(Sort.by(Sort.Direction.DESC, "taskDateTime"));
