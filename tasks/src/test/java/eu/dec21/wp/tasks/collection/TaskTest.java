@@ -473,10 +473,12 @@ public class TaskTest {
         Task task = new Task();
         assertFalse(task.isArchived());
         assertTrue(task.isActual());
+        assertTrue(task.isActive());
 
         task.archive();
         assertTrue(task.isArchived());
         assertFalse(task.isActual());
+        assertFalse(task.isActive()); // archiving deactivates the task
 
         task.setArchived(Boolean.FALSE);
         assertFalse(task.isArchived());

@@ -28,4 +28,13 @@ public interface TaskService {
 
     void delete(String id);
     long count();
+
+    Task archiveTask(String id);
+    Task completeTask(String id);
+    Task cancelTask(String id);
+    Task reopenTask(String id);
+    Task blockTask(String id);
+    Task unblockTask(String id);
+    Task activateTask(String id);
+    Task deactivateTask(String id);
 }

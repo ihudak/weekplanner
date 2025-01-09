@@ -168,6 +168,89 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.count();
     }
 
+    @Override
+    public Task archiveTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (!task.isComplete()) {
+            throw new BadRequestException("Task must be completed before archiving");
+        }
+        task.archive();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task completeTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot complete a task that is archived");
+        } else if (task.isComplete()) {
+            throw new BadRequestException("Cannot complete a task that is already completed");
+        }
+        task.complete();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task cancelTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot cancel a task that is archived");
+        }
+        task.cancel();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task reopenTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot reopen a task that is archived");
+        } else if (!task.isComplete()) {
+            throw new BadRequestException("Cannot reopen a task that is not completed");
+        }
+        task.reopen();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task blockTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot block a task that is archived");
+        } else if (task.isComplete()) {
+            throw new BadRequestException("Cannot block a completed task");
+        }
+        task.block();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task unblockTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot unblock a task that is archived");
+        }
+        task.unblock();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task activateTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot activate a task that is archived");
+        }
+        task.activate();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task deactivateTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        task.deactivate();
+        return taskRepository.save(task);
+    }
+
     private TaskResponse getTaskResponse(Page<Task> tasks) {
         List<Task> taskList = tasks.getContent();
 

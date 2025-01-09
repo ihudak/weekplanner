@@ -261,6 +261,7 @@ public class Task {
     }
 
     public void archive() {
+        this.deactivate();
         this.archived = Boolean.TRUE;
     }
 

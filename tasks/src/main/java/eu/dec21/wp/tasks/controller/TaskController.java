@@ -149,6 +149,102 @@ public class TaskController {
         return ResponseEntity.ok(new TaskIdResponse(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/archive")
+    @Operation(summary = "Archive Task by ID")
+    public ResponseEntity<Task> archiveTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.archiveTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/complete")
+    @Operation(summary = "Complete Task by ID")
+    public ResponseEntity<Task> completeTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.completeTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/cancel")
+    @Operation(summary = "Cancel Task by ID")
+    public ResponseEntity<Task> cancelTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.cancelTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/reopen")
+    @Operation(summary = "Reopen Task by ID")
+    public ResponseEntity<Task> reopenTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.reopenTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/block")
+    @Operation(summary = "Block Task by ID")
+    public ResponseEntity<Task> blockTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.blockTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/unblock")
+    @Operation(summary = "Unblock Task by ID")
+    public ResponseEntity<Task> unblockTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.unblockTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/activate")
+    @Operation(summary = "Activate Task by ID")
+    public ResponseEntity<Task> activateTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.activateTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/deactivate")
+    @Operation(summary = "Deactivate Task by ID")
+    public ResponseEntity<Task> deactivateTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.deactivateTask(id));
+    }
+
     private void verifyCategory(Long id) throws ResourceNotFoundException {
         // no caching on purpose. Every time fetch category by a rest call
         categoryRepository.getCategoryById(id == 0L ? 1L : id);
