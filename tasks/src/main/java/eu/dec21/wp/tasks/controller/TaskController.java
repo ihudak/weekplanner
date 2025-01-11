@@ -245,6 +245,42 @@ public class TaskController {
         return ResponseEntity.ok(taskService.deactivateTask(id));
     }
 
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/forward")
+    @Operation(summary = "Move Task state Forward by taskID")
+    public ResponseEntity<Task> forwardTaskState(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.stateForwardTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/backward")
+    @Operation(summary = "Move Task state Backwaerd by taskID")
+    public ResponseEntity<Task> backwardTaskState(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.stateBackwardTask(id));
+    }
+
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Success", content = { @Content(schema = @Schema(implementation = String.class), mediaType = "application/json") }),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = { @Content(schema = @Schema()) }),
+            @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
+    })
+    @PatchMapping("{id}/start")
+    @Operation(summary = "Start Task by ID")
+    public ResponseEntity<Task> startTask(@PathVariable String id) {
+        return ResponseEntity.ok(taskService.startTask(id));
+    }
+
     private void verifyCategory(Long id) throws ResourceNotFoundException {
         // no caching on purpose. Every time fetch category by a rest call
         categoryRepository.getCategoryById(id == 0L ? 1L : id);

@@ -743,6 +743,149 @@ public class TaskServiceTest {
         assertFalse(task.isActive());
     }
 
+    @Test
+    void stateForward() {
+        Task task = taskDirector.constructRandomTask();
+        task.setState(TaskStates.PREP);
+        taskRepository.save(task);
+
+        taskService.stateForwardTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.READY, task.getState());
+
+        taskService.stateForwardTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.IMPL, task.getState());
+
+        taskService.stateForwardTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.DONE, task.getState());
+
+        Task finalTask = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateForwardTask(finalTask.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.DONE, task.getState());
+
+        task.setState(TaskStates.CANCEL);
+        taskRepository.save(task);
+        Task finalTask1 = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateForwardTask(finalTask1.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.CANCEL, task.getState());
+
+        task.archive();
+        taskRepository.save(task);
+        Task finalTask2 = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateForwardTask(finalTask2.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.CANCEL, task.getState());
+
+        assertThrows(ResourceNotFoundException.class, () -> taskService.stateForwardTask("non existing task"));
+    }
+
+    @Test
+    void stateBackward() {
+        Task task = taskDirector.constructRandomTask();
+        task.setState(TaskStates.IMPL);
+        taskRepository.save(task);
+
+        taskService.stateBackwardTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.READY, task.getState());
+
+        taskService.stateBackwardTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.PREP, task.getState());
+
+        Task finalTask = task;
+        assertThrowsExactly(BadRequestException.class, () -> taskService.stateBackwardTask(finalTask.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.PREP, task.getState());
+
+        task.complete();
+        taskRepository.save(task);
+        Task finalTask0 = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateBackwardTask(finalTask0.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.DONE, task.getState());
+
+        task.setState(TaskStates.CANCEL);
+        taskRepository.save(task);
+        Task finalTask1 = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateBackwardTask(finalTask1.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.CANCEL, task.getState());
+
+        task.archive();
+        taskRepository.save(task);
+        Task finalTask2 = task;
+        assertThrows(BadRequestException.class, () -> taskService.stateBackwardTask(finalTask2.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.CANCEL, task.getState());
+
+        assertThrows(ResourceNotFoundException.class, () -> taskService.stateBackwardTask("non existing task"));
+    }
+
+    @Test
+    void startTask() {
+        Task task = taskDirector.constructRandomTask();
+        task.setState(TaskStates.PREP);
+        taskRepository.save(task);
+
+        taskService.startTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.IMPL, task.getState());
+
+        task.setState(TaskStates.READY);
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.READY, task.getState());
+        taskService.startTask(task.getTaskId());
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.IMPL, task.getState());
+
+        Task finalTask = task;
+        assertThrowsExactly(BadRequestException.class, () -> taskService.startTask(finalTask.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.IMPL, task.getState());
+
+        task.setState(TaskStates.DONE);
+        Task finalTask0 = task;
+        assertThrowsExactly(BadRequestException.class, () -> taskService.startTask(finalTask0.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.DONE, task.getState());
+
+        task.setState(TaskStates.CANCEL);
+        Task finalTask1 = task;
+        assertThrowsExactly(BadRequestException.class, () -> taskService.startTask(finalTask1.getTaskId()));
+        task = taskRepository.findById(task.getTaskId()).orElse(null);
+        assertNotNull(task);
+        assertEquals(TaskStates.CANCEL, task.getState());
+
+        taskService.archiveTask(task.getTaskId());
+        task.setState(TaskStates.DONE);
+        Task finalTask2 = task;
+        assertThrowsExactly(BadRequestException.class, () -> taskService.startTask(finalTask2.getTaskId()));
+
+        assertThrowsExactly(ResourceNotFoundException.class, () -> taskService.startTask("non existing task"));
+    }
+
     private Method getWeekEndMethod() throws NoSuchMethodException {
         Method method = TaskServiceImpl.class.getDeclaredMethod("getWeekEnd", Integer.class, Integer.class);
         method.setAccessible(true);

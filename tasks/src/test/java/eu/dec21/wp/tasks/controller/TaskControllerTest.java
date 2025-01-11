@@ -9,6 +9,7 @@ import eu.dec21.wp.tasks.service.TaskService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -418,226 +419,261 @@ public class TaskControllerTest {
     @Test
     void archiveTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "archive";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         task.complete();
         assertFalse(task.getArchived());
-
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/archive")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, null);
         assertTrue(task.getArchived());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/archive")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isOk()).andDo(MockMvcResultHandlers.print());
+        this.checkPositivePatchResponse(action, task, null, null);
         assertTrue(task.getArchived());
 
         task = tasks.getLast();
         assertFalse(task.isArchived());
         assertFalse(task.isComplete());
+        this.checkBadRequestPatchResponse(action, task, task.getState());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/archive")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/archive")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void completeTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "complete";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         assertFalse(task.isComplete());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/complete")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
-        assertEquals(TaskStates.DONE, task.getState());
+        this.checkPositivePatchResponse(action, task, null, TaskStates.DONE);
 
         // trying to complete a task that is already complete
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/complete")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
 
         task.cancel();
         task.archive();
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/complete")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-        assertEquals(TaskStates.CANCEL, task.getState());
-
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/complete")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void cancelTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "cancel";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         assertFalse(task.isComplete());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/cancel")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, TaskStates.CANCEL);
 
         // trying to cancel a task that is already cancelled
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/cancel")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isOk()).andDo(MockMvcResultHandlers.print());
-        assertEquals(TaskStates.CANCEL, task.getState());
+        this.checkPositivePatchResponse(action, task, TaskStates.CANCEL, TaskStates.CANCEL);
 
         task.setState(TaskStates.DONE);
         task.archive();
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/cancel")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-        assertEquals(TaskStates.DONE, task.getState());
-
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/cancel")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void reopenTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "reopen";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
-        task.complete();
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/reopen")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
-        assertEquals(TaskStates.READY, task.getState());
+        this.checkPositivePatchResponse(action, task, TaskStates.DONE, TaskStates.READY);
 
         // trying to reopen an open task
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/reopen")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-        assertEquals(TaskStates.READY, task.getState());
+        this.checkBadRequestPatchResponse(action, task, TaskStates.READY);
 
         task.complete();
         task.archive();
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/reopen")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
-        assertEquals(TaskStates.DONE, task.getState());
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/reopen")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void blockTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "block";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         assertFalse(task.isBlocked());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/block")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, null);
         assertTrue(task.isBlocked());
 
         task.cancel();
         assertFalse(task.isBlocked());
-
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/block")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+        this.checkBadRequestPatchResponse(action, task, null);
         assertFalse(task.isBlocked());
 
         task.archive();
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/block")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+        this.checkBadRequestPatchResponse(action, task, null);
         assertFalse(task.isBlocked());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/block")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void unblockTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "unblock";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         task.block();
         assertTrue(task.isBlocked());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/unblock")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, null);
         assertFalse(task.isBlocked());
 
         task.complete();
         task.archive();
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/unblock")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+        this.checkBadRequestPatchResponse(action, task, null);
         assertFalse(task.isBlocked());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/unblock")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void activateTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "activate";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         task.deactivate();
         assertFalse(task.isActive());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/activate")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, null);
         assertTrue(task.isActive());
 
         task.complete();
         task.archive();
 
         assertFalse(task.isActive());
-        response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/activate")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+        this.checkBadRequestPatchResponse(action, task, null);
         assertFalse(task.isActive());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/activate")
-                .contentType(MediaType.APPLICATION_JSON));
-        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+        this.checkNotFoundPatchResponse(action);
     }
 
     @Test
     void deactivateTask() throws Exception {
         this.setupPatchMocks();
+        final String action = "deactivate";
         tasks.addAll(taskDirector.constructRandomTasks(5));
         Task task = tasks.getFirst();
         assertTrue(task.isActive());
 
-        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/deactivate")
-                .contentType(MediaType.APPLICATION_JSON));
-        this.checkPositivePatchResponse(response, task);
+        this.checkPositivePatchResponse(action, task, null, null);
+        assertFalse(task.isActive());
+        this.checkPositivePatchResponse(action, task, null, null);
         assertFalse(task.isActive());
 
-        response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/deactivate")
+        this.checkNotFoundPatchResponse(action);
+    }
+
+    @Test
+    void forwardTaskState() throws Exception {
+        this.setupPatchMocks();
+        final String action = "forward";
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        Task task = tasks.getFirst();
+
+        this.checkPositivePatchResponse(action, task, TaskStates.PREP, TaskStates.READY);
+        this.checkPositivePatchResponse(action, task, TaskStates.READY, TaskStates.IMPL);
+        this.checkPositivePatchResponse(action, task, TaskStates.IMPL, TaskStates.DONE);
+
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
+
+        task.archive();
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
+        assertTrue(task.isArchived());
+
+        this.checkNotFoundPatchResponse(action);
+    }
+
+    @Test
+    void backwardTaskState() throws Exception {
+        this.setupPatchMocks();
+        final String action = "backward";
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        Task task = tasks.getFirst();
+
+        this.checkPositivePatchResponse(action, task, TaskStates.IMPL, TaskStates.READY);
+        this.checkPositivePatchResponse(action, task, TaskStates.READY, TaskStates.PREP);
+
+        this.checkBadRequestPatchResponse(action, task, TaskStates.PREP);
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
+
+        task.archive();
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
+        assertTrue(task.isArchived());
+
+        this.checkNotFoundPatchResponse(action);
+    }
+
+    @Test
+    void startTask() throws Exception {
+        this.setupPatchMocks();
+        final String action = "start";
+        tasks.addAll(taskDirector.constructRandomTasks(5));
+        Task task = tasks.getFirst();
+
+        this.checkPositivePatchResponse(action, task, TaskStates.PREP, TaskStates.IMPL);
+        this.checkPositivePatchResponse(action, task, TaskStates.READY, TaskStates.IMPL);
+
+        this.checkBadRequestPatchResponse(action, task, TaskStates.IMPL);
+        this.checkBadRequestPatchResponse(action, task, TaskStates.DONE);
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
+
+        task.archive();
+        this.checkBadRequestPatchResponse(action, task, TaskStates.CANCEL);
+        assertTrue(task.isArchived());
+
+        this.checkNotFoundPatchResponse(action);
+    }
+
+    private void checkBadRequestPatchResponse(String action, Task task, TaskStates desiredState) throws Exception {
+        if (null != desiredState) {
+            task.setState(desiredState);
+        }
+
+        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/" + action)
+                .contentType(MediaType.APPLICATION_JSON));
+        response.andExpect(MockMvcResultMatchers.status().isBadRequest()).andDo(MockMvcResultHandlers.print());
+
+        if (null != desiredState) {
+            assertEquals(desiredState, task.getState());
+        }
+    }
+
+    private void checkNotFoundPatchResponse(String action) throws Exception {
+        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + "non-existing" + "/" + action)
                 .contentType(MediaType.APPLICATION_JSON));
         response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
     }
 
-    private void checkPositivePatchResponse(ResultActions response, Task task) throws Exception {
+    private void checkPositivePatchResponse(String action, Task task, TaskStates initialState, TaskStates finalState) throws Exception {
+        if (null != initialState) {
+            task.setState(initialState);
+        }
+
+        ResultActions response = mockMvc.perform(patch("/api/v1/tasks/" + task.getTaskId() + "/" + action)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        if (null != finalState) {
+            assertEquals(finalState, task.getState());
+        }
+
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.taskId").value(task.getTaskId()))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.categoryId").value(task.getCategoryId()))
@@ -737,11 +773,7 @@ public class TaskControllerTest {
 
     private void setupPatchMocks() {
         when(taskService.archiveTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
+            Task task = this.verifyTask(invocation, false, false);
             if (!task.isComplete()) {
                 throw new BadRequestException("Task is not complete.");
             }
@@ -750,43 +782,19 @@ public class TaskControllerTest {
         });
 
         when(taskService.completeTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
-            if (task.isComplete()) {
-                throw new BadRequestException("Task is complete.");
-            }
+            Task task = this.verifyTask(invocation, true, true);
             task.complete();
             return task;
         });
 
         when(taskService.cancelTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
+            Task task = this.verifyTask(invocation, true, false);
             task.cancel();
             return task;
         });
 
         when(taskService.reopenTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
+            Task task = this.verifyTask(invocation, true, false);
             if (!task.isComplete()) {
                 throw new BadRequestException("Task is not complete.");
             }
@@ -795,58 +803,66 @@ public class TaskControllerTest {
         });
 
         when(taskService.blockTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
-            if (task.isComplete()) {
-                throw new BadRequestException("Task is complete.");
-            }
+            Task task = this.verifyTask(invocation, true, true);
             task.block();
             return task;
         });
 
         when(taskService.unblockTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
-            if (task.isComplete()) {
-                throw new BadRequestException("Task is complete.");
-            }
+            Task task = this.verifyTask(invocation, true, true);
             task.unblock();
             return task;
         });
 
         when(taskService.activateTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
-            if (task.isArchived()) {
-                throw new BadRequestException("Task is archived.");
-            }
+            Task task = this.verifyTask(invocation, true, false);
             task.activate();
             return task;
         });
 
         when(taskService.deactivateTask(anyString())).then((Answer<Task>) invocation -> {
-            String taskId = (String) invocation.getArgument(0, String.class);
-            Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
-            if (task == null) {
-                throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
-            }
+            Task task = this.verifyTask(invocation, false, false);
             task.deactivate();
             return task;
         });
+
+        when(taskService.stateForwardTask(anyString())).then((Answer<Task>) invocation -> {
+            Task task = this.verifyTask(invocation, true, true);
+            task.nextState();
+            return task;
+        });
+
+        when(taskService.stateBackwardTask(anyString())).then((Answer<Task>) invocation -> {
+            Task task = this.verifyTask(invocation, true, true);
+            if (TaskStates.PREP.equals(task.getState())) {
+                throw new BadRequestException("Task is in PREP state.");
+            }
+            task.prevState();
+            return task;
+        });
+
+        when(taskService.startTask(anyString())).then((Answer<Task>) invocation -> {
+            Task task = this.verifyTask(invocation, true, true);
+            if (!task.getState().isNew()) {
+                throw new BadRequestException("Task is not new");
+            }
+            task.start();
+            return task;
+        });
+    }
+
+    private Task verifyTask(InvocationOnMock invocation, boolean mustNotArchived, boolean mustNotComplete) throws ResourceNotFoundException, BadRequestException{
+        String taskId = (String) invocation.getArgument(0, String.class);
+        Task task = tasks.stream().filter(t -> t.getTaskId().equals(taskId)).findFirst().orElse(null);
+        if (task == null) {
+            throw new ResourceNotFoundException("Task does not exist with the given ID: " + taskId);
+        }
+        if (mustNotArchived && task.isArchived()) {
+            throw new BadRequestException("Task is archived.");
+        }
+        if (mustNotComplete && task.isComplete()) {
+            throw new BadRequestException("Task is complete.");
+        }
+        return task;
     }
 }

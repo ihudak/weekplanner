@@ -251,6 +251,51 @@ public class TaskServiceImpl implements TaskService {
         return taskRepository.save(task);
     }
 
+    @Override
+    public Task stateForwardTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot forward a task that is archived");
+        }
+        if (task.isComplete()) {
+            throw new BadRequestException("Cannot forward a completed task");
+        }
+        task.nextState();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task stateBackwardTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot backward a task that is archived");
+        }
+        if (task.isComplete()) {
+            throw new BadRequestException("Cannot backward a completed task");
+        }
+        if (TaskStates.PREP == task.getState()) {
+            throw new BadRequestException("Cannot backward a task in the " + task.getState() + " state");
+        }
+        task.prevState();
+        return taskRepository.save(task);
+    }
+
+    @Override
+    public Task startTask(String id) {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
+        if (task.isArchived()) {
+            throw new BadRequestException("Cannot start a task that is archived");
+        }
+        if (task.isComplete()) {
+            throw new BadRequestException("Cannot start a completed task");
+        }
+        if (!task.getState().isNew()) {
+            throw new BadRequestException("Cannot start a task in state " + task.getState());
+        }
+        task.start();
+        return taskRepository.save(task);
+    }
+
     private TaskResponse getTaskResponse(Page<Task> tasks) {
         List<Task> taskList = tasks.getContent();
 

@@ -32,9 +32,12 @@ public interface TaskService {
     Task archiveTask(String id);
     Task completeTask(String id);
     Task cancelTask(String id);
+    Task startTask(String id);
     Task reopenTask(String id);
     Task blockTask(String id);
     Task unblockTask(String id);
     Task activateTask(String id);
     Task deactivateTask(String id);
+    Task stateForwardTask(String id);
+    Task stateBackwardTask(String id);
 }
