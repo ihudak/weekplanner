@@ -1,6 +1,7 @@
 package eu.dec21.wp.users.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import eu.dec21.wp.users.dto.UserDto;
 import eu.dec21.wp.users.dto.UserResponse;
 import eu.dec21.wp.users.entity.User;
@@ -26,10 +27,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = UserController.class)
@@ -86,7 +86,7 @@ public class UserControllerTest {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
         userDto.setPassword("An0Th3RP@5Sw0rD!");
         userDto.setId(0L);
-        when(userService.updateUser(any(Long.class), any(UserDto.class))).thenReturn(userDto);
+        when(userService.updateUser(anyLong(), any(UserDto.class))).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(put("/api/v1/users/" + userDto.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -101,6 +101,20 @@ public class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.suspended", CoreMatchers.is(userDto.isSuspended())))
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id", CoreMatchers.is(userDto.getId().intValue())))
                 .andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
+    public void UserController_UpdateUser_NotExisting() throws Exception {
+        UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
+        userDto.setPassword("An0Th3RP@5Sw0rD!");
+        userDto.setId(0L);
+        when(userService.updateUser(anyLong(), any(UserDto.class))).thenThrow(new ResourceNotFoundException("User not found"));
+
+        ResultActions response = mockMvc.perform(put("/api/v1/users/" + 999999999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 
     @Test
@@ -143,7 +157,7 @@ public class UserControllerTest {
     public void UserController_UserDetail_ReturnUserDto() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
         userDto.setId(0L);
-        when(userService.getUserById(userDto.getId())).thenReturn(userDto);
+        when(userService.getUserById(anyLong())).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(get("/api/v1/users/" + userDto.getId())
                 .contentType(MediaType.APPLICATION_JSON));
@@ -160,10 +174,20 @@ public class UserControllerTest {
     }
 
     @Test
+    public void UserController_UserDetail_NonExisting() throws Exception {
+        when(userService.getUserById(anyLong())).thenThrow(new ResourceNotFoundException("User not found"));
+
+        ResultActions response = mockMvc.perform(get("/api/v1/users/" + 999999999L)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
     public void UserController_FindUser_ReturnUserDto() throws Exception {
         UserDto userDto = UserMapper.mapToUserDto(userDirector.constructRandomUser());
         userDto.setId(0L);
-        when(userService.findUserByEmail(userDto.getEmail())).thenReturn(userDto);
+        when(userService.findUserByEmail(anyString())).thenReturn(userDto);
 
         ResultActions response = mockMvc.perform(get("/api/v1/users/find?email=" + userDto.getEmail())
                 .contentType(MediaType.APPLICATION_JSON));
@@ -180,14 +204,34 @@ public class UserControllerTest {
     }
 
     @Test
+    public void UserController_FindUser_NonExisting() throws Exception {
+        when(userService.findUserByEmail(anyString())).thenThrow(new ResourceNotFoundException("User not found"));
+
+        ResultActions response = mockMvc.perform(get("/api/v1/users/find?email=" + "non.existing@email.com")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @Test
     public void UserController_DeleteUser_ReturnString() throws Exception {
         long userId = 1L;
-        doNothing().when(userService).deleteUser(any(Long.class));
+        doNothing().when(userService).deleteUser(anyLong());
 
         ResultActions response = mockMvc.perform(delete("/api/v1/users/" + userId)
                 .contentType(MediaType.APPLICATION_JSON));
 
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$", CoreMatchers.is("User deleted with ID: " + (int) userId)));
+    }
+
+    @Test
+    public void UserController_DeleteUser_NonExisting() throws Exception {
+        doThrow(new ResourceNotFoundException("Category does not exist with the given ID")).
+                when(userService).deleteUser(anyLong());
+
+        ResultActions response = mockMvc.perform(delete("/api/v1/users/" + 9999999999L)
+                .contentType(MediaType.APPLICATION_JSON));
+        response.andExpect(MockMvcResultMatchers.status().isNotFound());
     }
 }

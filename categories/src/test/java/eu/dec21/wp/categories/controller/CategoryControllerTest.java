@@ -7,6 +7,7 @@ import eu.dec21.wp.categories.entity.Category;
 import eu.dec21.wp.categories.entity.CategoryDirector;
 import eu.dec21.wp.categories.mapper.CategoryMapper;
 import eu.dec21.wp.categories.service.CategoryService;
+import eu.dec21.wp.exceptions.ResourceNotFoundException;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,9 +28,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 @WebMvcTest(controllers = CategoryController.class)
@@ -100,6 +101,19 @@ public class CategoryControllerTest {
     }
 
     @Test
+    public void CategoryController_UpdateCategory_NonExisting() throws Exception {
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
+        when(categoryService.updateCategory(anyLong(), any(CategoryDto.class))).
+                thenThrow(new ResourceNotFoundException("Category does not exist with the given ID"));
+
+        ResultActions response = mockMvc.perform(put("/api/v1/categories/" + 999999L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(categoryDto)));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
     public void CategoryController_GetAllCategories_ReturnResponseDto() throws Exception {
         ArrayList<CategoryDto> categoryDtos = new ArrayList<>(); // = CategoryDto.builder().name("Boo").color("red").priority(10).userId(1L).deleted(false).build();
         for (int i = 0; i < 10; i++) {
@@ -154,6 +168,17 @@ public class CategoryControllerTest {
     }
 
     @Test
+    public void CategoryController_CategoryDetail_NonExisting() throws Exception {
+        when(categoryService.getCategoryById(anyLong())).
+                thenThrow(new ResourceNotFoundException("Category does not exist with the given ID"));
+
+        ResultActions response = mockMvc.perform(get("/api/v1/categories/" + 99999999L)
+                .contentType(MediaType.APPLICATION_JSON));
+
+        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
     public void CategoryController_FindCategory_ReturnCategoryDto() throws Exception {
         CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryDirector.constructRandomCategoryForUser(1L));
         categoryDto.setId(0L);
@@ -174,6 +199,16 @@ public class CategoryControllerTest {
     }
 
     @Test
+    public void CategoryController_FindCategory_NonExisting() throws Exception {
+        when(categoryService.findCategoryByName(anyString(), anyLong())).
+                thenThrow(new ResourceNotFoundException("Category does not exist with the given ID"));
+
+        ResultActions response = mockMvc.perform(get("/api/v1/categories/find?name=" + "non-existing-name")
+                .contentType(MediaType.APPLICATION_JSON));
+        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
+    }
+
+    @Test
     public void CategoryController_DeleteCategory_ReturnString() throws Exception {
         long categoryId = 1L;
         doNothing().when(categoryService).deleteCategory(any(Long.class));
@@ -183,5 +218,15 @@ public class CategoryControllerTest {
 
         response.andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$", CoreMatchers.is("Category deleted with ID: " + (int) categoryId)));
+    }
+
+    @Test
+    public void CategoryController_DeleteCategory_NonExisting() throws Exception {
+        doThrow(new ResourceNotFoundException("Category does not exist with the given ID")).
+                when(categoryService).deleteCategory(anyLong());
+
+        ResultActions response = mockMvc.perform(delete("/api/v1/categories/" + 999999999L)
+                .contentType(MediaType.APPLICATION_JSON));
+        response.andExpect(MockMvcResultMatchers.status().isNotFound()).andDo(MockMvcResultHandlers.print());
     }
 }
