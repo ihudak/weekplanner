@@ -74,7 +74,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize) {
+    public TaskResponse searchTasks(String searchString, boolean inclArchived, int pageNo, int pageSize) throws BadRequestException {
         if (searchString == null || searchString.length() < 3) {
             throw new BadRequestException("Search string must be at least 3 characters");
         }
@@ -150,13 +150,13 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task getTaskById(String id) {
+    public Task getTaskById(String id) throws ResourceNotFoundException {
         return taskRepository.findById(id).
                 orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
     }
 
     @Override
-    public void delete(String id) {
+    public void delete(String id) throws ResourceNotFoundException{
         if (!taskRepository.existsById(id)) {
             throw new ResourceNotFoundException("Task does not exist with the given ID: " + id);
         }
@@ -169,7 +169,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task archiveTask(String id) {
+    public Task archiveTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (!task.isComplete()) {
             throw new BadRequestException("Task must be completed before archiving");
@@ -179,7 +179,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task completeTask(String id) {
+    public Task completeTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot complete a task that is archived");
@@ -191,7 +191,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task cancelTask(String id) {
+    public Task cancelTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot cancel a task that is archived");
@@ -201,7 +201,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task reopenTask(String id) {
+    public Task reopenTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot reopen a task that is archived");
@@ -213,7 +213,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task blockTask(String id) {
+    public Task blockTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot block a task that is archived");
@@ -225,7 +225,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task unblockTask(String id) {
+    public Task unblockTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot unblock a task that is archived");
@@ -235,7 +235,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task activateTask(String id) {
+    public Task activateTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot activate a task that is archived");
@@ -245,14 +245,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task deactivateTask(String id) {
+    public Task deactivateTask(String id) throws ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         task.deactivate();
         return taskRepository.save(task);
     }
 
     @Override
-    public Task stateForwardTask(String id) {
+    public Task stateForwardTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot forward a task that is archived");
@@ -265,7 +265,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task stateBackwardTask(String id) {
+    public Task stateBackwardTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot backward a task that is archived");
@@ -281,7 +281,7 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task startTask(String id) {
+    public Task startTask(String id) throws BadRequestException, ResourceNotFoundException {
         Task task = taskRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Task does not exist with the given ID: " + id));
         if (task.isArchived()) {
             throw new BadRequestException("Cannot start a task that is archived");

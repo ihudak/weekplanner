@@ -61,11 +61,11 @@ public class Task {
     @Indexed
     private String description;
     @NonNull
-    @Schema(name="state", example = "DONE", requiredMode = Schema.RequiredMode.REQUIRED, description = "The state of the task")
+    @Schema(name="state", example = "READY", requiredMode = Schema.RequiredMode.REQUIRED, description = "The state of the task")
     @Indexed
     private TaskStates state = TaskStates.PREP;
     @NonNull
-    @Schema(name="cronExpression", example = "0 0 * * 1", requiredMode = Schema.RequiredMode.REQUIRED, description = "The schedule of the task")
+    @Schema(name="cronExpression", example = "0 0 0 ? * MON#1", requiredMode = Schema.RequiredMode.REQUIRED, description = "The schedule of the task")
     @Size(min = 4, max = 12)
     private String cronExpression;
     @NonNull
@@ -77,18 +77,18 @@ public class Task {
     @Schema(name="taskLinks", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "The links necessary to accomplish the task")
     private List<TaskLink> taskLinks;
     @NonNull
-    @Schema(name="isBlocked", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is blocked")
+    @Schema(name="isBlocked", example = "false", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is blocked")
     @Indexed
     private Boolean isBlocked = Boolean.FALSE;
     @Null
-    @Schema(name="blockReason", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Verbal reason why the task is blocked")
+    @Schema(name="blockReason", example = "Blocked by team Mars", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Verbal reason why the task is blocked")
     @Size(max = maxDescriptionLength)
     private String blockReason;
     @Null
     @Schema(name="blockingIssues", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "The links to the blocking issues")
     private List<TaskLink> blockingIssues;
     @NonNull
-    @Schema(name="isActive", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is active to create recurring copies")
+    @Schema(name="isActive", example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether the task is active to create recurring copies")
     @Indexed
     private Boolean isActive = Boolean.TRUE;
     @NonNull
@@ -96,7 +96,7 @@ public class Task {
     @Indexed
     private LocalDateTime taskDateTime = LocalDateTime.now();
     @NonNull
-    @Schema(name="archived", requiredMode = Schema.RequiredMode.REQUIRED, description = "Indicates whether the task is archived")
+    @Schema(name="archived", example = "false", requiredMode = Schema.RequiredMode.REQUIRED, description = "Indicates whether the task is archived")
     @Indexed
     private Boolean archived = Boolean.FALSE;
 

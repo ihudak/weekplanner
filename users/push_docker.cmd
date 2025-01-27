@@ -1,2 +1,2 @@
-docker image build --platform linux/amd64 -t ivangudak096/weekplanner-users:latest .
-docker push ivangudak096/weekplanner-users:latest
+docker image build --platform linux/amd64 -t ihudak/weekplanner-users:latest .
+docker push ihudak/weekplanner-users:latest

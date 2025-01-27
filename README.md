@@ -45,3 +45,44 @@ This is a sample project to demonstrate how to instrument Graal Native images wi
   * open `<build-host-name>:4200` URL
   * create a task
   * check the data in your Dynatrace environment
+
+#### Kubernetes ####
+
+In the k8s directory you will find yaml files to setup the weekplanner on kubernetes.
+
+1. install ingress controller
+   1. Docker Desktop: Using Helm:
+
+    ```helm upgrade --install ingress-nginx ingress-nginx --repo https://kubernetes.github.io/ingress-nginx --namespace ingress-nginx --create-namespace```
+
+   2. Docker Desktop: Using kubectl:
+
+    ```kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml```   
+    *Note:* Restart Docker Desktop after setting up ingress-nginx
+
+   3. Azure Kubernetes Service (AKS)
+
+    ```helm install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingess-nginx `
+    --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz```
+
+   4. Minikube
+
+    ```minikube addons enable ingress```
+
+
+2. install the yaml in the following sequence:
+    
+   ```
+   kubectl apply -f ./namespace.yaml
+   kubectl apply -f ./databases.yaml
+   kubectl apply -f ./config.yaml
+   kubectl apply -f ./secret.yaml
+   kubectl apply -f ./categories.yaml
+   kubectl apply -f ./tasks.yaml
+   kubectl apply -f ./users.yaml
+   kubectl apply -f ./web.yaml
+   kubectl apply -f ./ingress.yaml          
+   ```
+
+*Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
+*Note 2:* ingress controller is configured to the local docker desktop setup. Please change the host field in `ingress.yaml` to set it up elsewhere

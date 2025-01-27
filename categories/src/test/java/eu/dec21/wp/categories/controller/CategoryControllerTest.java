@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -29,7 +30,6 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
@@ -60,11 +60,18 @@ public class CategoryControllerTest {
 
     @Test
     public void CategoryController_CreateCategory_ReturnCreated() throws Exception {
-        given(categoryService.createCategory(any())).willAnswer(invocation -> invocation.getArgument(0));
+        long newCategoryId = 1L;
+        when(categoryService.createCategory(any(CategoryDto.class))).then((Answer<CategoryDto>) invocation -> {
+            CategoryDto categoryDto = invocation.getArgument(0);
+            categoryDto.setId(newCategoryId);
+            return categoryDto;
+        });
+
+
 
         categories.add(categoryDirector.constructRandomCategoryForUser(1L));
         CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categories.getFirst());
-        categoryDto.setId(0L);
+        categoryDto.setId(newCategoryId);
 
         ResultActions response = mockMvc.perform(post("/api/v1/categories")
                 .contentType(MediaType.APPLICATION_JSON)

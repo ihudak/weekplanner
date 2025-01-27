@@ -61,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(updatedCategoryDto.getName());
         category.setPriority(updatedCategoryDto.getPriority());
         category.setColor(updatedCategoryDto.getColor());
+        category.setDeleted(updatedCategoryDto.isDeleted());
 
         Category updatedCategory = categoryRepository.save(category);
 

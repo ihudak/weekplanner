@@ -30,12 +30,12 @@ public class CategoryDto {
     private String color;
 
     @NonNull
-    @Schema(name="userId", example = "45", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the owner of the Category")
+    @Schema(name="userId", example = "1", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the owner of the Category")
     @Min(1)
     private Long userId;
 
     @Builder.Default
-    @Schema(name="deleted", example = "true", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether Category is deleted")
+    @Schema(name="deleted", example = "false", requiredMode = Schema.RequiredMode.NOT_REQUIRED, description = "Indicates whether Category is deleted")
     private boolean deleted = false;
 
     public boolean equals(CategoryDto c) {

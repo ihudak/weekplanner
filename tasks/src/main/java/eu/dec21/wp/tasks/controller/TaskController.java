@@ -264,7 +264,7 @@ public class TaskController {
             @ApiResponse(responseCode = "500", description = "Server Error", content = { @Content(schema = @Schema()) })
     })
     @PatchMapping("{id}/backward")
-    @Operation(summary = "Move Task state Backwaerd by taskID")
+    @Operation(summary = "Move Task state Backward by taskID")
     public ResponseEntity<Task> backwardTaskState(@PathVariable String id) {
         return ResponseEntity.ok(taskService.stateBackwardTask(id));
     }
