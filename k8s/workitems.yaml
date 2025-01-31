@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workitems
+  namespace: weekplanner
+  labels:
+    app: workitems
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: workitems
+  template:
+    metadata:
+      annotations:
+        metrics.dynatrace.com/path: /stats/prometheus
+        metrics.dynatrace.com/port: "15020"
+        metrics.dynatrace.com/scrape: "true"
+        metrics.dynatrace.com/secure: "false"
+      namespace: weekplanner
+      labels:
+        app: workitems
+        app.kubernetes.io/version: 1.2.0
+        app.kubernetes.io/part-of: WeekPlanner
+    spec:
+      containers:
+        - name: workitems
+          image: ghcr.io/ihudak/weekplanner-workitems:latest
+          ports:
+            - containerPort: 8080
+            - containerPort: 5005
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+            - secretRef:
+                name: weekplanner-secret
+          env:
+            - name: DT_RELEASE_VERSION
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['app.kubernetes.io/version']
+            - name: DT_RELEASE_BUILD_VERSION
+              value: "2024-04-08-21:40:50"
+            - name: SERVICE_NAME
+              value: WorkItems
+            - name: SERVICE_FULL_NAME
+              value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
+            - name: OTEL_RESOURCE_ATTRIBUTES
+              value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
+            - name: TENANT_URL
+              value: "https://$(TENANT_ID).$(TENANT_LAYER).$(DT_SRV).com"
+          resources:
+            limits:
+              cpu: 500m
+              memory: 768Mi
+            requests:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: workitems-svc
+  namespace: weekplanner
+spec:
+  selector:
+    app: workitems
+  type: ClusterIP # LoadBalancer
+  ports:
+    - name: http
+      port: 84
+      protocol: TCP
+      targetPort: 8080
+#      nodePort: 30008 # comment if ClusterIP
+    - name: debug
+      port: 5008
+      protocol: TCP
+      targetPort: 5005
+#      nodePort: 32008 # comment if ClusterIP

@@ -113,6 +113,19 @@ jobs:
         cache-from: type=gha
         cache-to: type=gha,mode=max
 
+    - name: Build and push workitems
+      uses: docker/build-push-action@v5
+      with:
+        context: ./workitems
+        push: ${{ github.event_name == 'push' || inputs.publish }}
+        tags: |
+          ghcr.io/ihudak/weekplanner-workitems:latest
+          ghcr.io/ihudak/weekplanner-workitems:${{ env.RELEASE_VERSION }}
+          ghcr.io/ihudak/weekplanner-workitems:build_${{ github.run_number }}
+        platforms: linux/amd64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
     - name: Build and push WebApp
       uses: docker/build-push-action@v5
       with:

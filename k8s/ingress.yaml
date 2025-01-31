@@ -34,6 +34,13 @@ spec:
                 name: users-svc
                 port:
                   number: 81
+          - path: /api/workitems/?(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: workitems-svc
+                port:
+                  number: 84
           - path: /api/test/?(.*)
             pathType: ImplementationSpecific
             backend:
