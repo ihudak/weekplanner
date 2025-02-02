@@ -13,7 +13,7 @@ b=""
 c="content"
 while [ "$b" != "$c" ];
 do
-	a=$(curl -s http://<server>/api/users/api/v1/users);
+	a=$(curl -s http://<server>/api/workitems/api/v1/workitems);
 	#b=${a:2:7};
 	echo $a;
 done

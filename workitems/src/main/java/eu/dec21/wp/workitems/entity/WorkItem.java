@@ -3,6 +3,7 @@ package eu.dec21.wp.workitems.entity;
 import com.github.javafaker.Address;
 import lombok.*;
 import com.github.javafaker.Faker;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -10,7 +11,7 @@ import com.github.javafaker.Faker;
 @AllArgsConstructor
 public class WorkItem {
 
-    private static Faker faker = new Faker();
+    private static Random random = new Random();
 
     private long id;
 
@@ -34,23 +35,22 @@ public class WorkItem {
 
     public static WorkItem generateWorkItem() {
         WorkItem workItem = new WorkItem();
-        workItem.setId(faker.random().nextLong());
-        workItem.setName(faker.app().name());
-        workItem.setDescription(faker.book().title());
-        Address address = faker.address();
-        workItem.setCountry(address.country());
-        workItem.setCity(address.city());
-        workItem.setAddress(address.fullAddress());
-        workItem.setAssignee(address.lastName() + " " + address.firstName());
-        workItem.setPoints(faker.number().numberBetween(1, 100));
-        workItem.setCost(faker.random().nextDouble());
-        workItem.setBlocked(faker.bool().bool());
+        workItem.setId(random.nextLong());
+        workItem.setName("Name" + random.nextLong());
+        workItem.setDescription("Description" + random.nextLong());
+        workItem.setCountry("Country" + random.nextLong());
+        workItem.setCity("City" + random.nextLong());
+        workItem.setAddress("Address" + random.nextLong());
+        workItem.setAssignee("Assignee" + random.nextLong());
+        workItem.setPoints(random.nextInt(100));
+        workItem.setCost(random.nextDouble());
+        workItem.setBlocked(random.nextBoolean());
         return workItem;
     }
 
     public long generateId() {
         if (  id == 0) {
-            id = faker.random().nextLong();
+            id = random.nextLong();
         }
         return id;
     }

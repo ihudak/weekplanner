@@ -2,6 +2,7 @@ package eu.dec21.wp.workitems.controller;
 
 import eu.dec21.wp.model.Version;
 import eu.dec21.wp.workitems.service.WorkItemService;
+import eu.dec21.wp.workitems.service.impl.WorkItemServiceImpl;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,8 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/version")
 public class VersionController {
-    @Autowired
-    private WorkItemService workItemService;
+    private final WorkItemService workItemService = new WorkItemServiceImpl();
     @Value("${application.version}")
     private String svcVer;
     @Value("${application.date}")
