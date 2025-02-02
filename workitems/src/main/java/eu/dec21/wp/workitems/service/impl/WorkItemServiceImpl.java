@@ -8,6 +8,7 @@ import eu.dec21.wp.workitems.mapper.WorkItemMapper;
 import eu.dec21.wp.workitems.repository.WorkItemRepository;
 import eu.dec21.wp.workitems.service.WorkItemService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,8 +16,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class WorkItemServiceImpl implements WorkItemService {
-    @Autowired
-    private WorkItemRepository workItemRepository;
+    private WorkItemRepository workItemRepository = new WorkItemRepository();
 
 
     @Override

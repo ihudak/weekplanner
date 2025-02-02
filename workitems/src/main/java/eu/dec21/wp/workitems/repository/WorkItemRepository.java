@@ -11,14 +11,22 @@ import java.util.ArrayList;
 
 @Repository
 public class WorkItemRepository {
+    @Value("${workitems.count}")
+    private String wrkItemCount;
 
     private ArrayList<WorkItem> workItems;
 
-    private Logger logger = LoggerFactory.getLogger(WorkItemRepository.class);
+    final private Logger logger = LoggerFactory.getLogger(WorkItemRepository.class);
 
-    WorkItemRepository(@Value("${workitems.count}") int wkrItmCnt) {
-        workItems = new ArrayList<>(wkrItmCnt);
-        for (int i = 0; i < wkrItmCnt; i++) {
+    public WorkItemRepository() {
+        int workItemCount;
+        try {
+            workItemCount = Integer.parseInt(this.wrkItemCount);
+        } catch (NumberFormatException e) {
+            workItemCount = 100;
+        }
+        workItems = new ArrayList<>(workItemCount);
+        for (int i = 0; i < workItemCount; i++) {
             workItems.add(WorkItem.generateWorkItem());
         }
     }
