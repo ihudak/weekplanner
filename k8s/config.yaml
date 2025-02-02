@@ -9,7 +9,8 @@ data:
   WP_MONGO_SERVER: "mongo-service"
   WP_CATEGORIES_SERVER: "categories-svc:82"
   WP_TASKS_SERVER: "tasks-svc:83"
-  WP_USERS_SERVER: "users_svc:81"
+  WP_USERS_SERVER: "users-svc:81"
+  WP_WORKITEMS_SERVER: "workitems-svc:84"
   WP_SERVER_ADDR: "localhost" # categories-svc
   WP_SERVER_PROTO: "http"
   WP_SERVER_PORT: "8080"

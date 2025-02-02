@@ -135,5 +135,5 @@ allprojects {
 }
 
 tasks.register('dynatraceNativeCompile') {
-    dependsOn(':users:dynatraceNativeCompile', ':tasks:dynatraceNativeCompile', ':categories:dynatraceNativeCompile')
+    dependsOn(':workitems:dynatraceNativeCompile', ':users:dynatraceNativeCompile', ':tasks:dynatraceNativeCompile', ':categories:dynatraceNativeCompile')
 }
