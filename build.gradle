@@ -1,8 +1,8 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.12' apply(false)
-    id 'io.spring.dependency-management' version '1.1.6'
-    id 'org.graalvm.buildtools.native' version '0.10.3' apply(false)
+    id 'org.springframework.boot' version '3.4.1' apply(false)
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.graalvm.buildtools.native' version '0.10.4' apply(false)
     id 'com.dynatrace.buildtools.graalnative' version '2.0.0' apply(false)
 }
 
@@ -19,13 +19,14 @@ subprojects {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-web'
-        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
-        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.4.0'
-        implementation 'org.projectlombok:lombok:1.18.32'
-        annotationProcessor 'org.projectlombok:lombok:1.18.32'
+        implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
+        implementation 'org.projectlombok:lombok:1.18.36'
+        annotationProcessor 'org.projectlombok:lombok:1.18.36'
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'com.github.javafaker:javafaker:1.0.2'
+        testImplementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
+        testImplementation 'org.yaml:snakeyaml:2.3'
+        testImplementation 'org.apache.maven.plugins:maven-surefire-plugin:3.5.2'
     }
 }
 
@@ -45,7 +46,6 @@ project("categories") {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
-        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
         runtimeOnly 'org.postgresql:postgresql'
         implementation project(':common')
         implementation project(':exceptions')
@@ -66,7 +66,6 @@ project("users") {
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
         implementation 'org.hibernate:hibernate-entitymanager:5.6.15.Final'
-        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
         runtimeOnly 'org.postgresql:postgresql'
         implementation project(':common')
         implementation project(':exceptions')
@@ -86,11 +85,10 @@ project("tasks") {
     apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
         implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
-        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
+        implementation 'org.apache.httpcomponents.client5:httpclient5:5.4.1'
         implementation project(':common')
         implementation project(':exceptions')
-        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring31x:4.11.0'
-//        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo:4.12.2'
+        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring3x:4.18.0'
     }
     dynatrace {
         agentDownload {
@@ -105,10 +103,10 @@ project("workitems") {
     apply plugin: 'org.graalvm.buildtools.native'
     apply plugin: 'com.dynatrace.buildtools.graalnative'
     dependencies {
-        implementation 'org.apache.httpcomponents.client5:httpclient5:5.3'
         implementation project(':common')
         implementation project(':exceptions')
-        implementation 'com.github.javafaker:javafaker:1.0.2'
+        implementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
+        implementation 'org.yaml:snakeyaml:2.3'
     }
     dynatrace {
         agentDownload {
@@ -131,6 +129,7 @@ allprojects {
 
     tasks.named('test') {
         useJUnitPlatform()
+        jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}"
     }
 }
 

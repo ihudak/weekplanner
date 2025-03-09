@@ -90,10 +90,7 @@ public class UserDto {
         if (this.lastName != null && o.lastName == null || this.lastName == null && o.lastName != null) {
             return false;
         }
-        if (this.lastName != null && !this.lastName.equals(o.lastName)) {
-            return false;
-        }
-        return true;
+        return this.lastName == null || this.lastName.equals(o.lastName);
     }
 
     @Override

@@ -18,8 +18,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class CategoryServiceImpl implements CategoryService {
+    private final CategoryRepository categoryRepository;
+
     @Autowired
-    private CategoryRepository categoryRepository;
+    CategoryServiceImpl(CategoryRepository categoryRepository) {
+        this.categoryRepository = categoryRepository;
+    }
+
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         Category category = CategoryMapper.mapToCategory(categoryDto);
@@ -56,6 +61,7 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(updatedCategoryDto.getName());
         category.setPriority(updatedCategoryDto.getPriority());
         category.setColor(updatedCategoryDto.getColor());
+        category.setDeleted(updatedCategoryDto.isDeleted());
 
         Category updatedCategory = categoryRepository.save(category);
 

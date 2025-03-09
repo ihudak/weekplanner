@@ -1,5 +1,5 @@
-import { TaskLink } from "./task.link";
-import { TaskState } from "./task.state";
+import {TaskLink} from "./task.link";
+import {TaskState} from "./task.state";
 
 export class Task {
   taskId: string | undefined;
@@ -7,7 +7,7 @@ export class Task {
   title: string = '';
   description: string | undefined;
   state: TaskState = TaskState.PREP;
-  cronSchedule: string = '';
+  cronExpression: string = '';
   taskLinks: TaskLink[] | undefined;
   addedPriority: number = 0;
 
@@ -27,7 +27,7 @@ export class Task {
 
     return this.categoryId >= 0           &&
       this.title.trim().length > 0        &&
-      this.cronSchedule.trim().length > 0 &&
+      this.cronExpression.trim().length > 0 &&
       this.addedPriority >= -50 && this.addedPriority <= 50;
   }
 }

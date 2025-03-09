@@ -161,7 +161,6 @@ class CategoryRepositoryTest {
     void nameMustExist() {
         // build category w/o name
         var category = categoryBuilder.reset()
-                .setId(faker.random().nextLong())
                 .setPriority(faker.number().numberBetween(Constraints.minPrio, Constraints.maxPrio))
                 .setColor(faker.color().hex())
                 .setUserId(faker.random().nextLong())
@@ -189,7 +188,6 @@ class CategoryRepositoryTest {
     void priorityMustExist() {
         // build category w/o priority
         var category = categoryBuilder.reset()
-                .setId(faker.random().nextLong())
                 .setName(getRandStr(10))
                 .setColor(faker.color().hex())
                 .setUserId(faker.random().nextLong())
@@ -204,7 +202,6 @@ class CategoryRepositoryTest {
     void userIDMustExist() {
         // build category w/o userId
         var category = categoryBuilder.reset()
-                .setId(faker.random().nextLong())
                 .setName(getRandStr(10))
                 .setPriority(faker.number().numberBetween(Constraints.minPrio, Constraints.maxPrio))
                 .setColor(faker.color().hex())
@@ -217,7 +214,7 @@ class CategoryRepositoryTest {
 
     private void genMultiuser(int[] numCats) {
         for(int i = 0; i < numCats.length; i++) {
-            List<Category> categories = categoryDirector.constructRandomCategoriesForUser((long)i + 1,numCats[i]);
+            List<Category> categories = categoryDirector.constructRandomCategoriesForUser((long)i + 1, numCats[i]);
             categoryRepository.saveAll(categories);
         }
     }

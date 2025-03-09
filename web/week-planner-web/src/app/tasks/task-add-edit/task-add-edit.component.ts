@@ -31,7 +31,7 @@ export class TaskAddEditComponent implements OnInit {
       categoryId:    0,
       title:         '',
       description:   '',
-      cronSchedule:  '',
+      cronExpression:  '',
       state:         '',
       addedPriority: 0
     })

@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ class CategoryServiceTest {
         //lenient().when(categoryRepository.save(Mockito.any(Category.class))).thenReturn(categoriesUser1.get(0));
 
         // count
-        lenient().when(categoryRepository.count()).then((Answer) invocation -> (long)categories.size());
+        lenient().when(categoryRepository.count()).then((Answer<Long>) invocation -> (long)categories.size());
 
         // find by id
         lenient().when(categoryRepository.findById(Mockito.any(Long.class))).then((Answer<Optional<Category>>) invocation -> {
@@ -78,7 +79,7 @@ class CategoryServiceTest {
             long userId = invocation.getArgument(1, Long.class);
             if (!categories.isEmpty()) {
                 for (Category category: categories) {
-                    if(category.getName().equals(name) && category.getUserId().equals(userId)) {
+                    if (category.getName().equals(name) && category.getUserId().equals(userId)) {
                         return Optional.of(category);
                     }
                 }
@@ -107,7 +108,12 @@ class CategoryServiceTest {
             @Override
             public Category answer(InvocationOnMock invocation) throws Throwable {
                 Category category = invocation.getArgument(0, Category.class);
-                if (0 == category.getId()) {
+
+                long categoryId = 0L;
+                try {
+                    categoryId = category.getId();
+                } catch (Exception ignored) {}
+                if (0L == categoryId) {
                     category.setId(sequence++);
                 }
                 return category;
@@ -136,11 +142,11 @@ class CategoryServiceTest {
 
 
         // find all, all for user, paged
-        lenient().when(categoryRepository.findAll()).then((Answer) invocation -> categories);
+        lenient().when(categoryRepository.findAll()).then((Answer<List<Category>>) invocation -> categories);
         Page<Category> categoryPage = Mockito.mock(Page.class);
         lenient().when(categoryRepository.findAll(Mockito.any(Pageable.class))).thenReturn(categoryPage);
         lenient().when(categoryRepository.findAllByUserId(Mockito.anyLong()))
-                .then((Answer) invocation ->
+                .then((Answer<List<Category>>) invocation ->
                         categories.stream().filter(cat -> cat.getUserId().equals(invocation.getArgument(0, Long.class)))
                                 .collect(Collectors.toList()));
         lenient().when(categoryRepository.findAllByUserId(Mockito.any(Pageable.class), Mockito.anyLong())).thenReturn(categoryPage);
@@ -153,11 +159,11 @@ class CategoryServiceTest {
     @Test
     void createCategory() {
         categories.add(categoryDirector.constructRandomCategory());
-        CategoryDto savedCategory = categoryService.createCategory(CategoryMapper.mapToCategoryDto(categories.get(0)));
+        CategoryDto savedCategory = categoryService.createCategory(CategoryMapper.mapToCategoryDto(categories.getFirst()));
 
         assertEquals(1,             savedCategory.getId());
 
-        assertTrue(savedCategory.equals(CategoryMapper.mapToCategoryDto(categories.get(0))));
+        assertTrue(savedCategory.equals(CategoryMapper.mapToCategoryDto(categories.getFirst())));
     }
 
     @Test
@@ -228,13 +234,13 @@ class CategoryServiceTest {
     @Test
     void updateCategory() {
         categories = categoryDirector.constructRandomCategories(1);
-        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryRepository.save(categories.get(0)));
+        CategoryDto categoryDto = CategoryMapper.mapToCategoryDto(categoryRepository.save(categories.getFirst()));
         String newName = "My Plan";
         categoryDto.setName(newName);
         categoryService.updateCategory(categoryDto.getId(), categoryDto);
 
         assertEquals(1, categoryRepository.count());
-        assertEquals(newName, categories.get(0).getName());
+        assertEquals(newName, categories.getFirst().getName());
 
         assertThrows(ResourceNotFoundException.class, () -> categoryService.updateCategory((long) (categories.size() + 1), categoryDto));
     }

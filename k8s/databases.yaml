@@ -25,7 +25,7 @@
 #    spec:
 #      containers:
 #        - name: mysql
-#          image: ivangudak096/wp-mysql
+#          image: ihudak/wp-mysql
 #          ports:
 #            - containerPort: 3306
 #          env:
@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: ivangudak096/wp-postgres:latest
+          image: ihudak/wp-postgres:latest
           ports:
             - containerPort: 5432
           env:

@@ -1,4 +1,4 @@
-FROM ubuntu:jammy
+FROM ubuntu:latest
 LABEL org.opencontainers.image.authors="dec21.eu"
 
 ENV EXECUTABLE=users

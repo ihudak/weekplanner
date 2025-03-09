@@ -53,10 +53,10 @@ class UserServiceTest {
     @BeforeEach
     void setUp() {
         users = new ArrayList<>();
-//        lenient().when(userRepository.save(Mockito.any(User.class))).thenReturn(users.get(0));
+//        lenient().when(userRepository.save(Mockito.any(User.class))).thenReturn(users.getFirst());
 
         // count
-        lenient().when(userRepository.count()).thenAnswer((Answer) invocation -> (long) users.size());
+        lenient().when(userRepository.count()).thenAnswer((Answer<Long>) invocation -> (long) users.size());
 
         // find by id
         lenient().when(userRepository.findById(Mockito.any(Long.class))).then((Answer<Optional<User>>) invocation -> {
@@ -105,7 +105,11 @@ class UserServiceTest {
             @Override
             public User answer(InvocationOnMock invocation) throws Throwable {
                 User user = invocation.getArgument(0, User.class);
-                if (0 == user.getId()) {
+                long userId = 0L;
+                try{
+                    userId = user.getId();
+                }catch (Exception ignored){}
+                if (0L == userId) {
                     user.setId(sequence++);
                 }
                 return user;
@@ -123,7 +127,7 @@ class UserServiceTest {
         }).when(userRepository).deleteById(Mockito.any(Long.class));
 
         // find all
-        lenient().when(userRepository.findAll()).then((Answer) invocation -> users);
+        lenient().when(userRepository.findAll()).then((Answer<List<User>>) invocation -> users);
 
         // find paged
         Page<User> userPage = Mockito.mock(Page.class);
@@ -137,15 +141,15 @@ class UserServiceTest {
     @Test
     void createUser() {
         users.add(userDirector.constructRandomUser());
-        assertThrows(BadRequestException.class, () -> userService.createUser(UserMapper.mapToUserDto(users.get(0))));
+        assertThrows(BadRequestException.class, () -> userService.createUser(UserMapper.mapToUserDto(users.getFirst())));
 
-        UserDto userDto = UserMapper.mapToUserDto(users.get(0));
+        UserDto userDto = UserMapper.mapToUserDto(users.getFirst());
         userDto.setPassword("Sup3RsTr0nGP@s5w0rD!");
         UserDto savedUser = userService.createUser(userDto);
 
         assertEquals(1,                   savedUser.getId());
 
-        assertTrue(savedUser.equals(UserMapper.mapToUserDto(users.get(0))));
+        assertTrue(savedUser.equals(UserMapper.mapToUserDto(users.getFirst())));
     }
 
     @Test
@@ -192,18 +196,18 @@ class UserServiceTest {
     void updateUser() {
         String newPassword = "An0Th3RP@5Sw0rD!";
         users = userDirector.constructRandomUsers(1);
-        UserDto userDto = UserMapper.mapToUserDto(userRepository.save(users.get(0)));
+        UserDto userDto = UserMapper.mapToUserDto(userRepository.save(users.getFirst()));
         String newName = "Bart";
         userDto.setFirstName(newName);
         userService.updateUser(userDto.getId(), userDto);
 
         assertEquals(1, userRepository.count());
-        assertEquals(newName, users.get(0).getFirstName());
+        assertEquals(newName, users.getFirst().getFirstName());
 
-        String oldPassword = users.get(0).getPassword();
+        String oldPassword = users.getFirst().getPassword();
         userDto.setPassword(newPassword);
         userService.updateUser(userDto.getId(), userDto);
-        assertNotEquals(users.get(0).getPassword(), oldPassword);
+        assertNotEquals(users.getFirst().getPassword(), oldPassword);
 
         assertThrows(ResourceNotFoundException.class, () -> userService.updateUser((long) (users.size() + 1), userDto));
     }

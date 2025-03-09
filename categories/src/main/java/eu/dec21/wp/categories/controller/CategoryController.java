@@ -29,6 +29,9 @@ public class CategoryController {
     @PostMapping("")
     @Operation(summary = "Create a new Category")
     public ResponseEntity<CategoryDto> createCategory(@RequestBody CategoryDto categoryDto) {
+        if (categoryDto.getId() != null) {
+            categoryDto.setId(null);  // avoid exception because of existing id
+        }
         CategoryDto savedCategory = categoryService.createCategory(categoryDto);
         return new ResponseEntity<>(savedCategory, HttpStatus.CREATED);
     }
