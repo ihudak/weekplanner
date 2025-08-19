@@ -47,8 +47,6 @@ spec:
               value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
             - name: OTEL_RESOURCE_ATTRIBUTES
               value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
-            - name: TENANT_URL
-              value: "https://$(TENANT_ID).$(TENANT_LAYER).$(DT_SRV).com"
           resources:
             limits:
               cpu: 500m

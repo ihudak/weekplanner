@@ -18,15 +18,14 @@ data:
   WP_PG_PORT: "5432"
   WP_MONGO_PORT: "27017"
   WP_MONGO_AUTH_DB: "admin"
-  TENANT_ID: "rvq58374"
+  TENANT_ID: "aa5170aa-3c64-47de-abc5-5980b3f144a1"
+  TENANT_URL: "https://tac886.managed-dev.dynalabs.io:9999/e/aa5170aa-3c64-47de-abc5-5980b3f144a1"
   APP_NAME: "WeekPlanner"
   SVC_SUFFIX: "AOT"
   SECURITY_CONTEXT: "Plan"
   COST_CENTER: "PlanningDept"
   COST_PRODUCT: "Planner"
   MY_ATTR: "https://github.com/ihudak/weekplanner"
-  TENANT_LAYER: "dev" # dev | sprint
-  DT_SRV: "dynatracelabs"
   WP_PROFILE: "prod" # prod | stage | dev -- logging levels -- prod:ERROR; stage:INFO; dev:DEBUG
   WP_ACTIVE_WEB_ENV: "custom" # production|staging|development|custom -- production (k8s docker desktop w Ingress) | staging (k8s docker desktop w/o Ingress) | development (w/o kubernetes)
   WEEKPLAN_BASE_SRV_URL: "http://kubernetes.docker.internal" # if web_app_profile==custom, this is the base EXTERNAL URL where microservices APIs can be found by the web app
