@@ -2,6 +2,7 @@ package eu.dec21.wp.categories.mapper;
 
 import eu.dec21.wp.categories.dto.CategoryDto;
 import eu.dec21.wp.categories.entity.Category;
+import eu.dec21.wp.categories.entity.CategoryBuilder;
 
 public class CategoryMapper {
     public static CategoryDto mapToCategoryDto(Category category) {
@@ -16,13 +17,13 @@ public class CategoryMapper {
     }
 
     public static Category mapToCategory(CategoryDto categoryDto) {
-        return new Category(
-                categoryDto.getId(),
-                categoryDto.getName(),
-                categoryDto.getPriority(),
-                categoryDto.getColor(),
-                categoryDto.getUserId(),
-                categoryDto.isDeleted()
-        );
+        return new CategoryBuilder()
+                .setId(categoryDto.getId())
+                .setName(categoryDto.getName())
+                .setPriority(categoryDto.getPriority())
+                .setColor(categoryDto.getColor())
+                .setUserId(categoryDto.getUserId())
+                .setDeleted(categoryDto.isDeleted())
+                .build();
     }
 }

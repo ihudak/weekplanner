@@ -11,8 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,11 +28,17 @@ public class CategoryServiceImpl implements CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    @Transactional
     @Override
     public CategoryDto createCategory(CategoryDto categoryDto) {
         Category category = CategoryMapper.mapToCategory(categoryDto);
-        Category savedCategory = categoryRepository.save(category);
-        return CategoryMapper.mapToCategoryDto(savedCategory);
+        try {
+            Category savedCategory = categoryRepository.save(category);
+            return CategoryMapper.mapToCategoryDto(savedCategory);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // Reload entity and retry or inform user
+            throw new ConcurrentModificationException("Category was updated by another user");
+        }
     }
 
     @Override
@@ -53,6 +62,7 @@ public class CategoryServiceImpl implements CategoryService {
         return getCategoryResponse(categories);
     }
 
+    @Transactional
     @Override
     public CategoryDto updateCategory(Long categoryId, CategoryDto updatedCategoryDto) {
         Category category = categoryRepository.findById(categoryId)
@@ -63,11 +73,16 @@ public class CategoryServiceImpl implements CategoryService {
         category.setColor(updatedCategoryDto.getColor());
         category.setDeleted(updatedCategoryDto.isDeleted());
 
-        Category updatedCategory = categoryRepository.save(category);
-
-        return CategoryMapper.mapToCategoryDto(updatedCategory);
+        try {
+            Category updatedCategory = categoryRepository.save(category);
+            return CategoryMapper.mapToCategoryDto(updatedCategory);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // Reload entity and retry or inform user
+            throw new ConcurrentModificationException("Category was updated by another user");
+        }
     }
 
+    @Transactional
     @Override
     public CategoryDto updateCategory(String name, Long userId, CategoryDto updatedCategoryDto) {
         Category category = categoryRepository.findByNameAndUserId(name, userId)
@@ -77,9 +92,13 @@ public class CategoryServiceImpl implements CategoryService {
         category.setPriority(updatedCategoryDto.getPriority());
         category.setColor(updatedCategoryDto.getColor());
 
-        Category updatedCategory = categoryRepository.save(category);
-
-        return CategoryMapper.mapToCategoryDto(updatedCategory);
+        try {
+            Category updatedCategory = categoryRepository.save(category);
+            return CategoryMapper.mapToCategoryDto(updatedCategory);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // Reload entity and retry or inform user
+            throw new ConcurrentModificationException("Category was updated by another user");
+        }
     }
 
     @Override

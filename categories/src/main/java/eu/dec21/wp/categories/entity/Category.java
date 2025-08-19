@@ -37,6 +37,9 @@ public class Category {
     @Column(name = "deleted")
     private boolean deleted = false;
 
+    @Version
+    private Long version;
+
     public void setPriority(int priority) {
         if (priority > Constraints.maxPrio) {
             priority = Constraints.maxPrio;

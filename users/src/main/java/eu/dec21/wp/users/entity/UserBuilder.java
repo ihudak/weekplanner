@@ -44,7 +44,7 @@ public class UserBuilder {
         return this;
     }
 
-    public UserBuilder setId(long id) {
+    public UserBuilder setId(Long id) {
         if (this.user == null) {
             this.reset();
         }
@@ -73,6 +73,14 @@ public class UserBuilder {
             this.reset();
         }
         this.user.setSuspended(suspended);
+        return this;
+    }
+
+    public UserBuilder setVersion(Long version) {
+        if (this.user == null) {
+            this.reset();
+        }
+        this.user.setVersion(version);
         return this;
     }
 

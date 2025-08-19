@@ -38,4 +38,7 @@ public class User {
 
     @Column(name = "suspended")
     private boolean suspended = false;
+    
+    @Version
+    private Long version;
 }

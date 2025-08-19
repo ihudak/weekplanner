@@ -12,8 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
 
+    @Transactional
     @Override
     public UserDto createUser(UserDto userDto) {
         User user = UserMapper.mapToUser(userDto);
@@ -31,8 +35,14 @@ public class UserServiceImpl implements UserService {
         }
 
         user.setPassword(userDto.getPassword());
-        User savedUser = userRepository.save(user);
-        return UserMapper.mapToUserDto(savedUser);
+
+        try {
+            User savedUser = userRepository.save(user);
+            return UserMapper.mapToUserDto(savedUser);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // Reload entity and retry or inform user
+            throw new ConcurrentModificationException("User was updated by another user");
+        }
     }
 
     @Override
@@ -68,6 +78,7 @@ public class UserServiceImpl implements UserService {
         return userResponse;
     }
 
+    @Transactional
     @Override
     public UserDto updateUser(Long userId, UserDto updatedUserDto) {
         User user = userRepository.findById(userId)
@@ -84,9 +95,13 @@ public class UserServiceImpl implements UserService {
             user.setPassword(updatedUserDto.getPassword());
         }
 
-        User updatedUser = userRepository.save(user);
-
-        return UserMapper.mapToUserDto(updatedUser);
+        try {
+            User updatedUser = userRepository.save(user);
+            return UserMapper.mapToUserDto(updatedUser);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            // Reload entity and retry or inform user
+            throw new ConcurrentModificationException("Category was updated by another user");
+        }
     }
 
     @Override

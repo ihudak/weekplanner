@@ -24,9 +24,10 @@ This is a sample project to demonstrate how to instrument Graal Native images wi
 
 * configure Dynatrace OneAgent in build.gradle
 * Configure environment variables on your build machine
-  * environmentUrl = <tenant-id>.live.dynatrace.com
+  * environmentUrl = <tenant-id>.live.dynatrace.com (for Dynatrace SaaS)
     * *(please make sure you use ".live", not ".apps" for production tenants)*
     * *(please make sure you do not set ".apps" in the url for dev or sprint tenants, e.g. <tenant-id>.sprint.dynatracelabs.com instead of <tenant-id>. ~~apps.~~ sprint.dynatracelabs.com
+  * environmentUrl = <dynatrace-cluster-url>/e/<tenant-id> (for Dynatrace Managed)
   * apiToken = <doken with deployment scope>
 * build the project with `./gradlew clean dynatraceNativeCompile` command
 * start the Databases:
@@ -87,12 +88,13 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
     
    ```
    kubectl apply -f ./namespace.yaml
-   kubectl apply -f ./databases.yaml
    kubectl apply -f ./config.yaml
    kubectl apply -f ./secret.yaml
+   kubectl apply -f ./databases.yaml
    kubectl apply -f ./categories.yaml
    kubectl apply -f ./tasks.yaml
    kubectl apply -f ./users.yaml
+   kubectl apply -f ./workitems.yaml
    kubectl apply -f ./web.yaml
    kubectl apply -f ./ingress.yaml          
    ```
