@@ -59,7 +59,7 @@ public class CategoryController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        // this.prepopulateCategories();
+        this.prepopulateCategories();
         return new ResponseEntity<>(categoryService.getAllCategories(pageNo, pageSize), HttpStatus.OK);
     }
 
@@ -105,20 +105,16 @@ public class CategoryController {
     @PostMapping("prepopulate")
     @Operation(summary = "Get Category by name")
     public ResponseEntity<CategoryResponse> prepopulateCategories() {
-        if (4 > categoryService.count()) {
-            if (!categoryService.existCategory(1L)) {
-                categoryService.createCategory(new CategoryDto(1L, "Graal", 30, "bb", 1L, false));
-            }
-            if (!categoryService.existCategory(2L)) {
-                categoryService.createCategory(new CategoryDto(2L, "Grail", 15, "bb", 1L, false));
-            }
-            if (!categoryService.existCategory(3L)) {
-                categoryService.createCategory(new CategoryDto(3L, "Apps", 10, "bb", 1L, false));
-            }
-            if (!categoryService.existCategory(4L)) {
-                categoryService.createCategory(new CategoryDto(4L, "TechFit", 0, "bb", 1L, false));
-            }
-        }
+        this.createCategoryIfMissing("Graal", 30, "red");
+        this.createCategoryIfMissing("Grail", 15, "blue");
+        this.createCategoryIfMissing("Apps", 10, "green");
+        this.createCategoryIfMissing("TechFit", 0, "yellow");
         return new ResponseEntity<>(categoryService.getAllCategories(0, 1000), HttpStatus.OK);
+    }
+
+    private void createCategoryIfMissing(String categoryName, int priority, String color) {
+        if (!categoryService.existCategoryByName(categoryName, 1L)) {
+            categoryService.createCategory(new CategoryDto(null, categoryName, priority, color, 1L, false));
+        }
     }
 }

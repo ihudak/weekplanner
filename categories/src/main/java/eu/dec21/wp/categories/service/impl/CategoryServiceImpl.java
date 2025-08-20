@@ -161,4 +161,9 @@ public class CategoryServiceImpl implements CategoryService {
     public boolean existCategory(Long categoryId) {
         return categoryRepository.existsById(categoryId);
     }
+
+    @Override
+    public boolean existCategoryByName(String name, Long userId) {
+        return categoryRepository.existsByNameAndUserId(name, userId);
+    }
 }

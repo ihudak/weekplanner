@@ -19,4 +19,5 @@ public interface CategoryService {
     void deleteCategory(String name, Long userId);
     long count();
     boolean existCategory(Long categoryId);
+    boolean existCategoryByName(String name, Long userId);
 }
