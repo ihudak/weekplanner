@@ -4,6 +4,8 @@ import eu.dec21.wp.users.dto.UserDto;
 import eu.dec21.wp.users.entity.User;
 import eu.dec21.wp.users.entity.UserBuilder;
 
+import java.util.Optional;
+
 public class UserMapper {
     public static UserDto mapToUserDto(User user) {
         return new UserDto(
@@ -19,14 +21,16 @@ public class UserMapper {
     }
 
     public static User mapToUser(UserDto userDto) {
-        return new UserBuilder()
-                .setId(userDto.getId())
+        UserBuilder userBuilder = new UserBuilder()
                 .setFirstName(userDto.getFirstName())
                 .setLastName(userDto.getLastName())
                 .setEmail(userDto.getEmail())
                 .setAuthSystem(userDto.getAuthSystem())
                 .setAuthID(userDto.getAuthID())
-                .setSuspended(userDto.isSuspended())
-                .build();
+                .setSuspended(userDto.isSuspended());
+
+        Optional.ofNullable(userDto.getId()).ifPresent(userBuilder::setId);
+
+        return userBuilder.build();
     }
 }

@@ -44,7 +44,7 @@ public class CategoryBuilder {
         return this;
     }
 
-    public CategoryBuilder setId(Long id) {
+    public CategoryBuilder setId(long id) {
         if (this.category == null) {
             this.reset();
         }
@@ -57,14 +57,6 @@ public class CategoryBuilder {
             this.reset();
         }
         this.category.setDeleted(deleted);
-        return this;
-    }
-
-    public CategoryBuilder setVersion(Long version) {
-        if (this.category == null) {
-            this.reset();
-        }
-        this.category.setVersion(version);
         return this;
     }
 

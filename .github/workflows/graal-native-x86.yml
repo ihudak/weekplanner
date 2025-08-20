@@ -138,3 +138,16 @@ jobs:
         platforms: linux/amd64
         cache-from: type=gha
         cache-to: type=gha,mode=max
+
+    - name: Build and push Postgres
+      uses: docker/build-push-action@v5
+      with:
+        context: ./database/postgres
+        push: ${{ github.event_name == 'push' || inputs.publish }}
+        tags: |
+          ghcr.io/ihudak/wp-postgres:latest
+          ghcr.io/ihudak/wp-postgres:${{ env.RELEASE_VERSION }}
+          ghcr.io/ihudak/wp-postgres:build_${{ github.run_number }}
+        platforms: linux/amd64
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
