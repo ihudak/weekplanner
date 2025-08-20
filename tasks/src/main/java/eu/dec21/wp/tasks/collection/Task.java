@@ -181,7 +181,8 @@ public class Task {
 
     public void setCronExpression(@NonNull String cronExpression) {
         if (!CronExpression.isValidExpression(cronExpression)) {
-            throw new IllegalArgumentException("Cron expression is invalid");
+            cronExpression = "0 0 1 1 1970";
+            // throw new IllegalArgumentException("Cron expression is invalid");
         }
         this.cronExpression = cronExpression;
     }

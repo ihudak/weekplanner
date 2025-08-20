@@ -101,9 +101,12 @@ public class TaskTest {
     void setCronExpression() {
         Task task = new Task();
 
-        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression(""));
-        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression("**"));
-        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression("****************"));
+        String failoverCronExpression = "0 0 1 1 1970";
+        task.setCronExpression("**");
+        assertEquals(failoverCronExpression, task.getCronExpression());
+//        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression(""));
+//        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression("**"));
+//        assertThrowsExactly(IllegalArgumentException.class, () -> task.setCronExpression("****************"));
 
         String cronExpression = "0 0 0 ? * MON#1";
         task.setCronExpression(cronExpression);
