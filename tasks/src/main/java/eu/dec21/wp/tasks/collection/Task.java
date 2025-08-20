@@ -43,7 +43,6 @@ public class Task {
     final int maxAddedPriority = 30;
 
     @Id
-    @NonNull
     private String taskId;
     @NonNull
     @Schema(name="categoryId", example = "45", requiredMode = Schema.RequiredMode.REQUIRED, description = "ID of the task category (or project)")
