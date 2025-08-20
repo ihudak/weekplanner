@@ -156,4 +156,9 @@ public class CategoryServiceImpl implements CategoryService {
     public long count() {
         return categoryRepository.count();
     }
+
+    @Override
+    public boolean existCategory(Long categoryId) {
+        return categoryRepository.existsById(categoryId);
+    }
 }

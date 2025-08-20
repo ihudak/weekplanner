@@ -2,6 +2,7 @@ package eu.dec21.wp.categories.controller;
 
 import eu.dec21.wp.categories.dto.CategoryDto;
 import eu.dec21.wp.categories.dto.CategoryResponse;
+import eu.dec21.wp.categories.repository.CategoryRepository;
 import eu.dec21.wp.categories.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/categories")
 @AllArgsConstructor
 public class CategoryController {
+    private final CategoryRepository categoryRepository;
     private CategoryService categoryService;
 
     @ApiResponses({
@@ -106,16 +108,16 @@ public class CategoryController {
     @Operation(summary = "Get Category by name")
     public ResponseEntity<CategoryResponse> prepopulateCategories() {
         if (4 > categoryService.count()) {
-            if (null == categoryService.getCategoryById(1L)) {
+            if (!categoryService.existCategory(1L)) {
                 categoryService.createCategory(new CategoryDto(1L, "Graal", 30, "bb", 1L, false));
             }
-            if (null == categoryService.getCategoryById(2L)) {
+            if (!categoryService.existCategory(2L)) {
                 categoryService.createCategory(new CategoryDto(2L, "Grail", 15, "bb", 1L, false));
             }
-            if (null == categoryService.getCategoryById(3L)) {
+            if (!categoryService.existCategory(3L)) {
                 categoryService.createCategory(new CategoryDto(3L, "Apps", 10, "bb", 1L, false));
             }
-            if (null == categoryService.getCategoryById(4L)) {
+            if (!categoryService.existCategory(4L)) {
                 categoryService.createCategory(new CategoryDto(4L, "TechFit", 0, "bb", 1L, false));
             }
         }
