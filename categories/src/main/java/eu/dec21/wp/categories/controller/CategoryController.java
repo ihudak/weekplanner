@@ -59,7 +59,7 @@ public class CategoryController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        this.prepopulateCategories();
+        // this.prepopulateCategories();
         return new ResponseEntity<>(categoryService.getAllCategories(pageNo, pageSize), HttpStatus.OK);
     }
 
