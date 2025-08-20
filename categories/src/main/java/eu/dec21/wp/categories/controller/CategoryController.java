@@ -102,12 +102,23 @@ public class CategoryController {
     }
 
     // TODO: Remove after Perform
-    private void prepopulateCategories() {
-        if (0 == categoryService.count()) {
-            categoryService.createCategory(new CategoryDto(1L, "Graal",  30, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(2L, "Grail",  15, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(3L, "Apps",   10, "bb", 1L, false));
-            categoryService.createCategory(new CategoryDto(4L, "TechFit", 0, "bb", 1L, false));
+    @PostMapping("prepopulate")
+    @Operation(summary = "Get Category by name")
+    public ResponseEntity<CategoryResponse> prepopulateCategories() {
+        if (4 > categoryService.count()) {
+            if (null == categoryService.getCategoryById(1L)) {
+                categoryService.createCategory(new CategoryDto(1L, "Graal", 30, "bb", 1L, false));
+            }
+            if (null == categoryService.getCategoryById(2L)) {
+                categoryService.createCategory(new CategoryDto(2L, "Grail", 15, "bb", 1L, false));
+            }
+            if (null == categoryService.getCategoryById(3L)) {
+                categoryService.createCategory(new CategoryDto(3L, "Apps", 10, "bb", 1L, false));
+            }
+            if (null == categoryService.getCategoryById(4L)) {
+                categoryService.createCategory(new CategoryDto(4L, "TechFit", 0, "bb", 1L, false));
+            }
         }
+        return new ResponseEntity<>(categoryService.getAllCategories(0, 1000), HttpStatus.OK);
     }
 }

@@ -37,7 +37,7 @@ public class CategoryServiceImpl implements CategoryService {
             return CategoryMapper.mapToCategoryDto(savedCategory);
         } catch (ObjectOptimisticLockingFailureException e) {
             // Reload entity and retry or inform user
-            throw new ConcurrentModificationException("Category was updated by another user");
+            throw new ConcurrentModificationException("Category was updated by another user " + e.getMessage());
         }
     }
 
