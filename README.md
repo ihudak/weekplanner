@@ -76,7 +76,7 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
 
    3. Azure Kubernetes Service (AKS)
 
-    ```helm install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingess-nginx `
+    ```helm install ingress-nginx ingress-nginx/ingress-nginx --create-namespace --namespace ingress-nginx `
     --set controller.service.annotations."service\.beta\.kubernetes\.io/azure-load-balancer-health-probe-request-path"=/healthz```
 
    4. Minikube
@@ -90,14 +90,35 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
    kubectl apply -f ./namespace.yaml
    kubectl apply -f ./config.yaml
    kubectl apply -f ./secret.yaml
+   
    kubectl apply -f ./databases.yaml
+   # echo wait ~15 seconds to let the DBs start
+   
    kubectl apply -f ./categories.yaml
    kubectl apply -f ./tasks.yaml
    kubectl apply -f ./users.yaml
    kubectl apply -f ./workitems.yaml
+   kubectl apply -f ./rest-api-test.yaml
+   
    kubectl apply -f ./web.yaml
-   kubectl apply -f ./ingress.yaml          
+   ### echo Web App needs ~3min to start
+   
+   kubectl apply -f ./ingress.yaml 
    ```
 
 *Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
+*Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
 *Note 2:* ingress controller is configured to the local docker desktop setup. Please change the host field in `ingress.yaml` to set it up elsewhere
+
+3. Create some data
+   1. Categories
+      1. set the `server_url` variable to the host that you had specified in `ingress.yaml` in the `k8s/prepopulate_categories.sh` file 
+      2. execute the `k8s/prepopulate_categories.sh` script to create categories
+   2. Tasks
+      1. Open the UI (`http://<host-from-ingress.yaml>/)
+      2. Create several tasks in the UI
+
+4. Start the Data Generators
+   1. set the `srv_url` variable to the host that you had specified in `ingress.yaml` in the `workitems/load-test-curl.sh` file
+   2. execute the `workitems/load-test-curl.sh` script (it starts the endless loop calling the tasks and workitems services)
+
