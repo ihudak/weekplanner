@@ -70,12 +70,14 @@ spec:
               memory: 512Mi
           command:
             - sh
-              - -c
-              - |
+            - -c
+            - |
               apk add --no-cache curl && \
               while true; do
-              read -t $WORKITEM_TIMEOUT -p "Wait..."; echo;
-              echo $(curl -s http://$WP_WORKITEMS_SERVER/api/v1/workitems);
+                echo "$(date +"%Y-%m-%d-%H:%M:%S")"
+                echo "Waiting for $WORKITEM_TIMEOUT seconds..."
+                sleep $WORKITEM_TIMEOUT
+                echo $(curl -s http://$WP_WORKITEMS_SERVER/api/v1/workitems)  
               done
 ---
 apiVersion: v1

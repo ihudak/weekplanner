@@ -113,8 +113,8 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
    ```
 
 *Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
-*Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
-*Note 2:* ingress controller is configured to the local docker desktop setup. Please change the host field in `ingress.yaml` to set it up elsewhere
+*Note 2:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
+*Note 3:* ingress controller is configured to the local docker desktop setup. Please change the host field in `ingress.yaml` to set it up elsewhere
 
 
 
