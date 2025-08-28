@@ -120,7 +120,7 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
 
 #### Test Execution #### 
 
-3. Create some data
+1. Create some data
    1. Categories
       1. set the `server_url` variable to the host that you had specified in `ingress.yaml` in the `k8s/prepopulate_categories.sh` file 
       2. execute the `k8s/prepopulate_categories.sh` script to create categories
@@ -128,7 +128,7 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
       1. Open the UI (`http://<host-from-ingress.yaml>/`)
       2. Create several tasks in the UI
 
-4. Start the Data Generators
+2. Start the Data Generators
    1. set the `srv_url` variable to the host that you had specified in `ingress.yaml` in the `workitems/load-test-curl.sh` file
    2. execute the `workitems/load-test-curl.sh` script (it starts the endless loop calling the tasks and workitems services)
 
