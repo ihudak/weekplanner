@@ -20,6 +20,8 @@ This is a sample project to demonstrate how to instrument Graal Native images wi
   * DT_TENANTTOKEN
   * DT_CONNECTION_POINT
 
+
+
 #### Build ####
 
 * configure Dynatrace OneAgent in build.gradle
@@ -37,6 +39,8 @@ This is a sample project to demonstrate how to instrument Graal Native images wi
   * `cd week-planner-web/scr/environments`
   * set host in the `baseSrvUrl` variable in the `environment.ts`
   * run `npm install` in `week-planner-web` directory
+
+
 
 #### Execute ####
 
@@ -59,6 +63,8 @@ This is a sample project to demonstrate how to instrument Graal Native images wi
   * open `<build-host-name>:4200` URL
   * create a task
   * check the data in your Dynatrace environment
+
+
 
 #### Kubernetes ####
 
@@ -109,6 +115,10 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
 *Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
 *Note 1:* web client is configured to the local docker desktop setup. Please change the web url in `config.yaml` to set it up elsewhere     
 *Note 2:* ingress controller is configured to the local docker desktop setup. Please change the host field in `ingress.yaml` to set it up elsewhere
+
+
+
+#### Test Execution #### 
 
 3. Create some data
    1. Categories
