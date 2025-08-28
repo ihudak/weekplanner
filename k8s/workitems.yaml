@@ -54,6 +54,29 @@ spec:
             requests:
               cpu: 500m
               memory: 512Mi
+      initContainers:
+        - name: workitemscaller
+          image: alpine:latest
+          restartPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+          resources:
+            limits:
+              cpu: 200m
+              memory: 512Mi
+            requests:
+              cpu: 200m
+              memory: 512Mi
+          command:
+            - sh
+              - -c
+              - |
+              apk add --no-cache curl && \
+              while true; do
+              read -t $WORKITEM_TIMEOUT -p "Wait..."; echo;
+              echo $(curl -s http://$WP_WORKITEMS_SERVER/api/v1/workitems);
+              done
 ---
 apiVersion: v1
 kind: Service

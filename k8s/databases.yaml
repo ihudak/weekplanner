@@ -99,7 +99,7 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: ihudak/wp-postgres:latest
+          image: ghcr.io/ihudak/wp-postgres:latest
           ports:
             - containerPort: 5432
           env:
