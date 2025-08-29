@@ -48,11 +48,11 @@ spec:
               value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
           resources:
             limits:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 300m
+              memory: 512Mi
             requests:
-              cpu: 500m
-              memory: 1Gi
+              cpu: 300m
+              memory: 512Mi
 ---
 apiVersion: v1
 kind: Service

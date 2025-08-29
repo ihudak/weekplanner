@@ -51,11 +51,36 @@ spec:
               value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
           resources:
             limits:
-              cpu: 500m
+              cpu: 300m
               memory: 768Mi
             requests:
-              cpu: 500m
+              cpu: 300m
               memory: 512Mi
+      initContainers:
+        - name: taskscaller
+          image: alpine:latest
+          restartPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl && \
+              while true; do
+                echo "$(date +"%Y-%m-%d-%H:%M:%S")"
+                echo "Waiting for $WORKITEM_TIMEOUT seconds..."
+                sleep $WORKITEM_TIMEOUT
+                echo $(curl -s http://$WP_TASKS_SERVER/api/v1/tasks)  
+              done
 ---
 apiVersion: v1
 kind: Service
