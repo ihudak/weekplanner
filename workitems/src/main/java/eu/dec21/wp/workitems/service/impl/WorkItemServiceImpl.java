@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Random;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -23,6 +24,11 @@ public class WorkItemServiceImpl implements WorkItemService {
 
     @Override
     public WorkItemDto createWorkItem(WorkItemDto workItemDto) {
+        if (workItemDto.getId() == 0 || workItemDto.getId() == null) {
+            if (logger.isWarnEnabled()) logger.warn("workItem ID is null");
+            workItemDto.setId((new Random()).nextLong());
+        }
+        workItemDto.setId(null);
         WorkItem workItem = WorkItemMapper.mapToWorkItem(workItemDto);
         WorkItem savedWorkItem = workItemRepository.save(workItem);
         if (logger.isDebugEnabled()) logger.debug("Created WorkItem {}", savedWorkItem.getId());
