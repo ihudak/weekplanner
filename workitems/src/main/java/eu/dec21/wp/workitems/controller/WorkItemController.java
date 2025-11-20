@@ -13,6 +13,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Tag(name="WeekPlanner-WorkItems", description = "WorkItems API")
 @RestController
@@ -20,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @AllArgsConstructor
 public class WorkItemController {
     private WorkItemService workItemService;
+
+    private final Logger logger = LoggerFactory.getLogger(WorkItemController.class);
 
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Created", content = { @Content(schema = @Schema(implementation = WorkItemDto.class), mediaType = "application/json") }),
@@ -29,6 +33,7 @@ public class WorkItemController {
     @Operation(summary = "Create a new WorkItem")
     public ResponseEntity<WorkItemDto> createWorkItem(@RequestBody WorkItemDto workItemDto) {
         WorkItemDto savedWorkItem = workItemService.createWorkItem(workItemDto);
+        if (logger.isDebugEnabled()) logger.debug("Created WorkItem: {}", savedWorkItem.getId());
         return new ResponseEntity<>(savedWorkItem, HttpStatus.CREATED);
     }
 
@@ -39,7 +44,8 @@ public class WorkItemController {
     })
     @GetMapping("{id}")
     @Operation(summary = "Get WorkItem by ID")
-    public ResponseEntity<WorkItemDto> getUserById(@PathVariable("id") Long workItemId) {
+    public ResponseEntity<WorkItemDto> getWorkItemById(@PathVariable("id") Long workItemId) {
+        if (logger.isDebugEnabled()) logger.debug("Returning WorkItem: {}", workItemId);
         WorkItemDto workItemDto = workItemService.getWorkItemById(workItemId);
         return ResponseEntity.ok(workItemDto);
     }
@@ -55,6 +61,7 @@ public class WorkItemController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "100", required = false) int pageSize
     ) {
+        if (logger.isDebugEnabled()) logger.debug("Returning all WorkItems");
         return new ResponseEntity<>(workItemService.getAllWorkItems(pageNo, pageSize), HttpStatus.OK);
     }
 
@@ -67,6 +74,7 @@ public class WorkItemController {
     @Operation(summary = "Update WorkItem by ID")
     public ResponseEntity<WorkItemDto> updateWorkItem(@PathVariable("id") Long workItemId,
                                                       @RequestBody WorkItemDto updatedWorkItem) {
+        if (logger.isDebugEnabled()) logger.debug("Updating WorkItem: {}", workItemId);
         WorkItemDto workItemDto = workItemService.updateWorkItem(workItemId, updatedWorkItem);
         return ResponseEntity.ok(workItemDto);
     }
@@ -79,6 +87,7 @@ public class WorkItemController {
     @DeleteMapping("{id}")
     @Operation(summary = "Delete WorkItem by ID")
     public ResponseEntity<String> deleteWorkItemById(@PathVariable("id") Long workItemId) {
+        if (logger.isDebugEnabled()) logger.debug("Deleting WorkItem: {}", workItemId);
         workItemService.deleteWorkItem(workItemId);
         return ResponseEntity.ok("WorkItem deleted with ID: " + workItemId);
     }

@@ -10,6 +10,8 @@ import eu.dec21.wp.workitems.service.WorkItemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -17,12 +19,13 @@ import java.util.stream.Collectors;
 @Service
 public class WorkItemServiceImpl implements WorkItemService {
     private WorkItemRepository workItemRepository = new WorkItemRepository();
-
+    private final Logger logger = LoggerFactory.getLogger(WorkItemServiceImpl.class);
 
     @Override
     public WorkItemDto createWorkItem(WorkItemDto workItemDto) {
         WorkItem workItem = WorkItemMapper.mapToWorkItem(workItemDto);
         WorkItem savedWorkItem = workItemRepository.save(workItem);
+        if (logger.isDebugEnabled()) logger.debug("Created WorkItem {}", savedWorkItem.getId());
         return WorkItemMapper.mapToWorkItemDto(savedWorkItem);
     }
 
@@ -31,6 +34,7 @@ public class WorkItemServiceImpl implements WorkItemService {
         WorkItem workItem = workItemRepository.findById(workItemId);
 
         if (workItem == null) {
+            logger.error("WorkItem with id {} not found", workItemId);
             throw new ResourceNotFoundException("WorkItem with id " + workItemId + " not found");
         }
 
@@ -40,6 +44,11 @@ public class WorkItemServiceImpl implements WorkItemService {
     @Override
     public List<WorkItemDto> getAllWorkItems() {
         List<WorkItem> workItems = workItemRepository.findAll();
+        if (workItems == null || workItems.isEmpty()) {
+            logger.error("No WorkItems found");
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Found {} WorkItems", workItems.size());
+        }
         return workItems.stream().map(WorkItemMapper::mapToWorkItemDto).collect(Collectors.toList());
     }
 
@@ -56,6 +65,10 @@ public class WorkItemServiceImpl implements WorkItemService {
         workItemResponse.setTotalPages(1);
         workItemResponse.setLast(true);
 
+        if (logger.isDebugEnabled()) {
+            logger.debug("Found {} WorkItems", workItemList.size());
+        }
+
         return workItemResponse;
     }
 
@@ -64,7 +77,10 @@ public class WorkItemServiceImpl implements WorkItemService {
         WorkItem workItem = workItemRepository.findById(workItemId);
 
         if (workItem == null) {
+            logger.error("WorkItem with id {} not found", workItemId);
             throw new ResourceNotFoundException("WorkItem with id " + workItemId + " not found");
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Updated WorkItem with id {}", workItemId);
         }
 
         workItem.setName(updatedWorkItemDto.getName());
@@ -87,7 +103,10 @@ public class WorkItemServiceImpl implements WorkItemService {
         WorkItem workItem = workItemRepository.findById(workItemId);
 
         if (workItem == null) {
+            logger.error("WorkItem with id {} not found", workItemId);
             throw new ResourceNotFoundException("WorkItem with id " + workItemId + " not found");
+        } else if (logger.isDebugEnabled()) {
+            logger.debug("Deleted WorkItem with id {}", workItemId);
         }
 
         workItemRepository.deleteById(workItemId);
@@ -95,6 +114,7 @@ public class WorkItemServiceImpl implements WorkItemService {
 
     @Override
     public long count() {
+        if (logger.isDebugEnabled()) logger.debug("Found {} WorkItems", workItemRepository.count());
         return workItemRepository.count();
     }
 }
