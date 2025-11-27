@@ -19,6 +19,13 @@ In the k8s directory you will find yaml files to setup the weekplanner on kubern
    kubectl apply -f ./config.yaml
    kubectl apply -f ./secret.yaml
    kubectl apply -f ./workitems.yaml
+   kubectl apply -f ./databases.yaml
+   kubectl apply -f ./categories.yaml
+   kubectl apply -f ./users.yaml
+   kubectl apply -f ./tasks.yaml
+   kubectl apply -f ./web.yaml
+   kubectl apply -f ./ingress.yaml
+   
    ```
 
 *Note:* `workitem` pod gets one primary and one sidecar containers (the sidecar calls the workitem API in endless loop)

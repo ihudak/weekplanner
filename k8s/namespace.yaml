@@ -5,7 +5,10 @@ metadata:
   annotations:
     dec.21/engineering.center: lemberg
     dec.21/product: weekplanner
-    metadata.dynatrace.com/security: oneagent
+    metadata.dynatrace.com/security: mgd.live.pm
+    metadata.dynatrace.com/dt.management_zone: weekplanner.mgd
+    metadata.dynatrace.com/dt.owner_team: mgd-pm
+    metadata.dynatrace.com/dt.owner: alex
   labels:
     name: weekplanner
-    metadata.dynatrace.com/cost: cost
+    metadata.dynatrace.com/cost: cost-fin-dep

@@ -48,7 +48,7 @@ spec:
             - name: SERVICE_FULL_NAME
               value: "$(APP_NAME).$(SERVICE_NAME).$(SVC_SUFFIX)"
             - name: OTEL_RESOURCE_ATTRIBUTES
-              value: "dt.security_context=$(SECURITY_CONTEXT),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
+              value: "dt.security_circle=$(SECURITY_CIRCLE),dt.management_zone=$(MANAGEMENT_ZONE),dt.owner_team=$(OWNER_TEAM),dt.owner=$(OWNER),dt.cost.costcenter=$(COST_CENTER),dt.cost.project=$(COST_PRODUCT),my.resource.attribute=$(MY_ATTR)"
           resources:
             limits:
               cpu: 300m
@@ -56,6 +56,39 @@ spec:
             requests:
               cpu: 300m
               memory: 512Mi
+      initContainers:
+        - name: userscaller
+          image: alpine:latest
+          restartPolicy: Always
+          envFrom:
+            - configMapRef:
+                name: weekplanner-configmap
+          resources:
+            limits:
+              cpu: 100m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 512Mi
+          command:
+            - sh
+            - -c
+            - |
+              apk add --no-cache curl && \
+              sleep 30 && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Peter", "lastName": "Brown", "email": "peter.brown@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "facebook", "authID": "fb534635423534524", "suspended": "false"}' && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Sarah", "lastName": "Sparrow", "email": "sarah.sparrow@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "google", "authID": "g64576432634", "suspended": "false"}' && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Abraham", "lastName": "Gray", "email": "abraham.gray@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "twitter", "authID": "tw55346456345", "suspended": "false"}' && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Natalia", "lastName": "Green", "email": "natalia.green@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "azure", "authID": "az53464365345325", "suspended": "false"}' && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Katie", "lastName": "White", "email": "katie.white@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "aws", "authID": "aws46534643535432", "suspended": "false"}' && \
+              curl -X POST http://$WP_USERS_SERVER/api/v1/users -H "Content-Type: application/json" -d '{"firstName": "Alex", "lastName": "Black", "email": "alex.black@gmail.com", "password": "An0Th3RP@5Sw0rD!", "authSystem": "facebook", "authID": "fb534534532432", "suspended": "true"}' && \
+              while true; do
+                echo "$(date +"%Y-%m-%d-%H:%M:%S")"
+                echo "Waiting for $GETCALL_TIMEOUT seconds..."
+                sleep $GETCALL_TIMEOUT
+                echo $(curl -s http://$WP_USERS_SERVER/api/v1/users)  
+                echo $(curl -s http://$WP_USERS_SERVER/api/v1/version)  
+              done
 ---
 apiVersion: v1
 kind: Service

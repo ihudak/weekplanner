@@ -12,6 +12,7 @@ a=""
 while [ "$a" == "" ];
 do
 	a=$(curl -s http://localhost:3000/test);
+	#a=$(node ./client.js);
 	echo $a;
 	a="";
 done
