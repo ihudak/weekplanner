@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 LABEL org.opencontainers.image.authors="dec21.eu"
-
+LABEL maintainer=dec21.eu
 ENV EXECUTABLE=categories
 
 RUN mkdir -p /opt/app

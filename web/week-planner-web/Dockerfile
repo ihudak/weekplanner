@@ -1,7 +1,7 @@
 # choose base image to build off of
 FROM node:lts-alpine
 LABEL org.opencontainers.image.authors="dec21.eu"
-
+LABEL maintainer=dec21.eu
 ENV DOCKER_VER=1.0.0
 
 # set the current working directory for all commands

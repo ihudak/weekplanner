@@ -1,9 +1,9 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.4.1' apply(false)
+    id 'org.springframework.boot' version '3.4.13' apply(false)
     id 'io.spring.dependency-management' version '1.1.7'
-    id 'org.graalvm.buildtools.native' version '0.10.4' apply(false)
-    id 'com.dynatrace.buildtools.graalnative' version '2.0.0' apply(false)
+    id 'org.graalvm.buildtools.native' version '0.11.3' apply(false)
+    id 'com.dynatrace.buildtools.graalnative' version '2.2.0' apply(false)
 }
 
 // def globalAgentDir = System.getenv('DT_GRAALNATIVE_AGENT_DIR')?: 'C:/workspaces/agent/test/java/build/product/graalnative'
@@ -20,13 +20,15 @@ subprojects {
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
         implementation 'org.springframework.boot:spring-boot-starter-web'
         implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.4'
-        implementation 'org.projectlombok:lombok:1.18.36'
-        annotationProcessor 'org.projectlombok:lombok:1.18.36'
+        compileOnly 'org.projectlombok:lombok:1.18.42'
+        annotationProcessor 'org.projectlombok:lombok:1.18.42'
         developmentOnly 'org.springframework.boot:spring-boot-devtools'
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation ('com.github.javafaker:javafaker:1.0.2') { exclude module: 'snakeyaml' }
         testImplementation 'org.yaml:snakeyaml:2.3'
         testImplementation 'org.apache.maven.plugins:maven-surefire-plugin:3.5.2'
+        testCompileOnly 'org.projectlombok:lombok:1.18.42'
+        testAnnotationProcessor 'org.projectlombok:lombok:1.18.42'
     }
 }
 
@@ -121,15 +123,23 @@ allprojects {
     group = 'eu.dec21'
     version = '0.0.1-SNAPSHOT'
     java {
-        sourceCompatibility = '21'
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
     }
     repositories {
         mavenCentral()
     }
 
-    tasks.named('test') {
+    tasks.withType(Test).configureEach {
         useJUnitPlatform()
         jvmArgs "-javaagent:${configurations.testRuntimeClasspath.find { it.name.contains('mockito-core') }}"
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.release = 21
+        // Ensure Gradle uses a separate javac process (helps isolate daemon/JNI issues)
+        options.fork = true
     }
 }
 

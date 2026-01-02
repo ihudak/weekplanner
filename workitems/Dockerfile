@@ -1,6 +1,6 @@
 FROM ubuntu:jammy
 LABEL org.opencontainers.image.authors="dec21.eu"
-
+LABEL maintainer=dec21.eu
 ENV EXECUTABLE=workitems
 
 RUN mkdir -p /opt/app
